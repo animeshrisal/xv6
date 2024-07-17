@@ -4,7 +4,7 @@ ENTRY( _entry )
 SECTIONS
 {
   /*
-   * ensure that entry.S / _entry is at 0x80000000,
+   * ensure that entry.S / _entry is at virtual address 0,
    * where qemu's -kernel jumps.
    */
   . = 0x80100000;
@@ -37,4 +37,5 @@ SECTIONS
   }
 
   PROVIDE(end = .);
+
 }
