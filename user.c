@@ -1,12 +1,7 @@
 #include "syscalls.h"
 #include "types.h"
 
-int __attribute__((section(".usertext"))) main(void);
-
-uint64 syscall(uint64 nr, uint64 param);
-
 uint64 syscall(uint64 nr, uint64 param) {
-
   uint64 retval;
 
   asm volatile("mv a7, %0" : : "r"(nr) :);

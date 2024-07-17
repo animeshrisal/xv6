@@ -1,18 +1,11 @@
-.section .usertext
-.global _entry
+	.section .usertext
+	.global _entry
 _entry:
-  // load stack0 address into stack pointer
-  la sp, stack0
+        la      sp, stack0
+	li      a0, 4096
+        add     sp, sp, a0
 
-  // load 4096 value into a0
-  li a0, 1024*4
+	jal	setup
+loop:
+	j	loop
 
-  csrr a1, mhartid
-  addi a1, a1, 1
-  mul a0, a0, a1
-  add sp, sp, a0
-
-  call boot
-
-spin:
-  j spin
