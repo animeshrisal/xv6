@@ -1,7 +1,7 @@
 #include "syscalls.h"
 #include "types.h"
 
-int main(void);
+int __attribute__((section(".usertext"))) main(void);
 
 uint64 syscall(uint64 nr, uint64 param);
 

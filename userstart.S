@@ -1,4 +1,4 @@
-.section .text
+.section .usertext
 .global _entry
 _entry:
   // load stack0 address into stack pointer
@@ -12,6 +12,7 @@ _entry:
   mul a0, a0, a1
   add sp, sp, a0
 
+  call boot
 
 spin:
   j spin

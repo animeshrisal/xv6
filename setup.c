@@ -1,12 +1,10 @@
 #include "param.h"
 #include "riscv.h"
 
-__attribute__((aligned(16))) char stack0[4096 * NCPU];
-
 extern int main();
 extern void ex(void);
 
-void boot(void) {
+void setup(void) {
   unsigned long x = r_mstatus();
   x &= ~MSTATUS_MPP_MASK;
   x |= MSTATUS_MPP_U;
@@ -17,6 +15,7 @@ void boot(void) {
   w_mie(r_mie() | MIE_MSIE);
 
   w_mtvec((uint64)ex);
+
   // set M exception program counter to main, for mret.
   // requires gcc -mcmodel=medany
   w_mepc((uint64)main);
@@ -27,7 +26,7 @@ void boot(void) {
   w_pmpaddr1(0x800FFFFF);
   w_pmpcfg1(0x0);
 
-  w_pmpaddr2(0x80FFFFjFF);
+  w_pmpaddr2(0x80FFFFFF);
   w_pmpcfg2(0xf);
 
   asm volatile("mret");
