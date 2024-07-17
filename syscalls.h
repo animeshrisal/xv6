@@ -1,0 +1,2 @@
+
+enum { PRINTASTRING = 1, PUTACHAR, GETACHAR };
