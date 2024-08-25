@@ -1,35 +1,33 @@
+#include "virtq.h"
 #include "types.h"
 
-#define VIRTIO_QUEUE_SIZE 128
+void virtq_init(struct virtq *vq) {
+  vq->avail = (struct virtq_init)kalloc();
+  vq->used = (struct virtq_used *)kalloc();
 
-struct virtq_desc {
-  uint64 addr;
-  uint32 len;
-  uint16 flags;
-  uint16 next;
-};
+  vq->avail->idx = 0;
+  vq->used->idx = 0;
+}
 
-struct virtq_avail {
-  uint16 flags;
-  uint16 idx;
-  uint16 ring[VIRTIO_QUEUE_SIZE];
-  uint16 used_event;
-};
+int virtq_alloc_desc(struct virtq *vq) {
+  for (int i = 0; i < VIRTIO_QUEUE_SIZE; i++) {
+    if (!(vq->desc[i].flags & VIRTQ_DESC_F_USED)) {
+      vq->desc[i].flags = VIRTQ_DESC_F_USED;
+      return i;
+    }
+  }
 
-struct virtq_used_elem {
-  uint32 id;
-  uint32 len;
-};
+  return -1;
+}
 
-struct virtq_used {
-  uint16 flags;
-  uint16 idx;
-  struct virtq_used_elem ring[VIRTIO_QUEUE_SIZE];
-  uint16 avail_event;
-};
+void virtq_free_desc(struct virtq *vq, int index) { vq->desc[index].flags = 0; }
 
-struct virtq {
-  struct virtq_desc desc[VIRTIO_QUEUE_SIZE];
-  struct virtq_avail *avail;
-  struct virtq_used *used;
-};
+void virtq_add_to_avail(struct virtq *vq; int desc_index) {
+  vq->avail->ring[vq->avail->idx % VIRTIO_QUEUE_SIZE] = desc_index;
+  vq->avail->idx++;
+}
+
+void virtq_wait_for_used(struct virtq *vq) {
+  while (vq->used->idx == vq->avail->idx) {
+  }
+}
