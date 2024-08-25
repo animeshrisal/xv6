@@ -1,4 +1,8 @@
 #include "display.h"
+#include "virtq.h"
+#define NUM 8
+
+struct virtio_gpu gpu;
 
 void create_2d_resource(int virtio_gpu_fd) {
   struct virtio_gpu_resource_create_2d create_2d_cmd = {
@@ -50,9 +54,24 @@ void set_scanout(int virtio_gpu_fd) {
       .pmodes[0].enabled = 1};
 };
 
-void virtio_gpu_display_rectangle() {
-  int resource_id = 1;
-  create_2d_resource(resource_id);
-  attach_backing(resource_id);
-  transfer_to_host_2d(resource_id);
+void virtq_init(struct virtq *vq) {
+  vq->avail = (struct virtq_avail *)kalloc();
+  vq->used = (struct virtq_used *)kalloc();
+
+  vq->avail->idx = 0;
+  vq->used->idx = 0;
 }
+
+void virtio_gpu_send_command(void *cmd, int len) {
+  int desc_index = virtq_alloc_desc(&gpu.queue);
+  struct virtq_desc *desc = &gpu.queue.desc[desc_index];
+  desc->addr = (uint64)cmd;
+  desc->len = len;
+  desc->flags = 0;
+
+  virtq_add_to_avail(&gpu.queue, desc_index);
+  virtq_wait_for_used(&gpu.queue);
+  virtq_free_desc(&gpu.queue, desc_index);
+}
+
+void virtio_gpu_init() { virtq_init(&gpu.queue); }
