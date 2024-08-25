@@ -12,13 +12,9 @@ __attribute__((aligned(16))) char stack0[4096];
 void printhex(uint64);
 
 volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
+volatile struct uart *fb = (volatile struct uart *)0x40000000;
 
-// TODO: implement our syscalls here:
-
-// Syscall 1: printstring. Takes a char *, prints the string to the UART,
-// returns nothing Syscall 2: putachar.    Takes a char, prints the character to
-// the UART, returns nothing Syscall 3: getachar.    Takes no parameter, reads a
-// character from the UART (keyboard), returns the char
+static void draw_frame() {}
 
 static void putachar(char c) {
   while ((uart0->LSR & (1 << 5)) == 0)
@@ -80,7 +76,7 @@ void exception(void) {
   case GETACHAR:
     retval = (uint64)getachar();
     break;
-  
+
   default:
     printastring("*** INVALID SYSCALL NUMBER!!! ***\n");
     break;
@@ -90,5 +86,4 @@ void exception(void) {
   w_mepc(pc + 4);
 
   asm volatile("mv a0, %0" : : "r"(retval) :);
-
 }

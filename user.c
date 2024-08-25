@@ -1,8 +1,7 @@
 #include "syscalls.h"
 #include "types.h"
 
-
-
+/*
 uint64 syscall(uint64 nr, uint64 param) {
   uint64 retval;
 
@@ -28,9 +27,9 @@ int main(void) {
   char c = 0;
   printastring("Hello World!\n");
   do {
-    
+
     c = getachar();
-  
+
     if (c >= 'a' && c <= 'z')
       c = c & ~0x20;
     putachar(c);
@@ -40,3 +39,4 @@ int main(void) {
   printastring("This is the end!\n");
   return 0;
 }
+*/
