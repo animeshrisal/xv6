@@ -1,14 +1,21 @@
 #include "virtq.h"
 #include "types.h"
+#include "virtio.h"
 
 void virtq_init(struct virtq *vq) {
-  vq->avail = (struct virtq_init *)kalloc();
-  vq->used = (struct virtq_used *)kalloc();
+
+  uint32 status = 0;
+
+  *R(VIRTIO_MMIO_STATUS) = status;
+
+  // set ACKNOWLEDGE status bit
+  *R(VIRTIO_MMIO_STATUS) = status;
 
   vq->avail->idx = 0;
   vq->used->idx = 0;
 };
 
+// allocate a free descriptor
 int virtq_alloc_desc(struct virtq *vq) {
   for (int i = 0; i < VIRTIO_QUEUE_SIZE; i++) {
     if (!(vq->desc[i].flags)) {

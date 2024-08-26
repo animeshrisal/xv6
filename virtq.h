@@ -5,6 +5,10 @@
 
 #define VIRTIO_QUEUE_SIZE 8
 
+#define VIRTQ_DESC_F_NEXT 1
+#define VIRTQ_DESC_F_WRITE 2
+#define VIRTQ_DESC_F_USED 4
+
 struct virtq_desc {
   uint64 addr;
   uint32 len;
@@ -16,7 +20,6 @@ struct virtq_avail {
   uint16 flags;
   uint16 idx;
   uint16 ring[VIRTIO_QUEUE_SIZE];
-  uint16 used_event;
 };
 
 struct virtq_used_elem {
@@ -28,7 +31,6 @@ struct virtq_used {
   uint16 flags;
   uint16 idx;
   struct virtq_used_elem ring[VIRTIO_QUEUE_SIZE];
-  uint16 avail_event;
 };
 
 struct virtq {

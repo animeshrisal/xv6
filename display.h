@@ -73,7 +73,7 @@ struct virtio_gpu_resource_create_2d {
   uint32 height;
 };
 
-struct VIRTIO_GPU_CONFIG {
+struct virtio_gpu_config {
   uint32 events_read;
   uint32 events_clear;
   uint32 num_scanouts;
@@ -138,11 +138,9 @@ struct virtio_gpu_update_cursor {
   uint32 padding;
 };
 
-struct virtio_gpu {
-  struct virtq queue;
-  uint32 *notify;
-  uint32 queue_sel;
-  void *base;
-};
+void virtq_init();
+void virtio_gpu_send_command(void *cmd, int len);
+void virtio_gpu_init();
+void virtio_gpu_draw_rectangle();
 
 #endif

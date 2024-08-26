@@ -1,7 +1,6 @@
 #include "syscalls.h"
 #include "types.h"
 
-/*
 uint64 syscall(uint64 nr, uint64 param) {
   uint64 retval;
 
@@ -14,15 +13,13 @@ uint64 syscall(uint64 nr, uint64 param) {
   return retval;
 }
 
-// enum { PRINTASTRING = 1, PRINTACHAR, GETACHAR };
-
 void printastring(char *s) { syscall(PRINTASTRING, (uint64)s); }
 
 void putachar(char c) { syscall(PUTACHAR, (uint64)c); }
 
 char getachar(void) { return syscall(GETACHAR, 0); }
-// ----
 
+/*
 int main(void) {
   char c = 0;
   printastring("Hello World!\n");

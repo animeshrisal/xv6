@@ -37,3 +37,5 @@ void setup(void) {
   // -> main().
   asm volatile("mret");
 }
+
+void timerinit() { w_mie(r_mie() | MSTATUS_MIE); }
