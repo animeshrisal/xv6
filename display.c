@@ -1,18 +1,9 @@
 #include "display.h"
+#include "kernel.h"
 #include "virtio.h"
-#include "virtq.h"
 
 #define NUM 8
-
-static struct gpu {
-  struct virtq_desc *desc;
-  struct virtq_avail *avail;
-  struct virtq_used *used;
-
-  char free[NUM];
-  uint16 used_idx;
-} gpu;
-
+// Define feature bits for Virtio GPU
 void *memset(void *dst, int c, uint16 n) {
   char *cdst = (char *)dst;
   int i;
@@ -77,11 +68,62 @@ void virtq_initiazation() {
   *R(VIRTIO_MMIO_QUEUE_READY) = 0x1;
 }
 
-void virtio_gpu_send_command(void *cmd, int len) {}
-
 void virtio_gpu_init() {
-  virtq_init();
   // Create a 2D resource
+  // reset device
+  uint32 status = 0;
+
+  if (*R(VIRTIO_MMIO_MAGIC_VALUE) != 0x74726976) {
+    printastring("Could not find virtio\n");
+  } else if (*R(VIRTIO_MMIO_DEVICE_ID) != 16) {
+    printastring("GPU is not connected!\n");
+  }
+
+  // Reset device status
+  *R(VIRTIO_MMIO_STATUS) = 0;
+
+  // Set ACKNOWLEDGE status bit
+  *R(VIRTIO_MMIO_STATUS) = VIRTIO_CONFIG_S_ACKNOWLEDGE;
+
+  // Set DRIVER status bit
+  *R(VIRTIO_MMIO_STATUS) |= VIRTIO_CONFIG_S_DRIVER;
+
+  // Set queue size
+  *R(VIRTIO_MMIO_QUEUE_NUM) = 0;
+
+  // Negotiate features
+  uint64 features = *R(VIRTIO_MMIO_DEVICE_FEATURES);
+
+  // Mask out features that we don't support or need
+  features &= (VIRTIO_GPU_F_EDID | VIRTIO_GPU_F_VIRGL);
+
+  *R(VIRTIO_MMIO_DRIVER_FEATURES) = features;
+
+  // Notify device that feature negotiation is complete
+  *R(VIRTIO_MMIO_STATUS) |= VIRTIO_CONFIG_S_FEATURES_OK;
+
+  // Verify FEATURES_OK is set
+  status = *R(VIRTIO_MMIO_STATUS);
+
+  if (!(status & VIRTIO_CONFIG_S_FEATURES_OK)) {
+    printastring("ERROR!");
+    return;
+  }
+
+  *R(VIRTIO_MMIO_QUEUE_SEL) = 0;
+  // Ensure queue 0 is not in use
+  if (*R(VIRTIO_MMIO_QUEUE_READY)) {
+    printastring("Queue is being used");
+    return;
+  }
+
+  // Set the DRIVER_OK status bit
+  *R(VIRTIO_MMIO_STATUS) |= VIRTIO_CONFIG_S_DRIVER_OK;
+
+  // Print final status
+  status = *R(VIRTIO_MMIO_STATUS);
+  printastring("GPU Driver initialized!");
+
   struct virtio_gpu_resource_create_2d create_cmd = {
       .ctrl_header.type = VIRTIO_GPU_CMD_RESOURCE_CREATE_2D,
       .resource_id = 1,
@@ -120,13 +162,3 @@ void virtio_gpu_init() {
   };
   virtio_gpu_send_command(&set_scanout_cmd, sizeof(set_scanout_cmd));
 };
-
-void virtio_disk_intr() {
-  *R(VIRTIO_MMIO_INTERRUPT_ACK) = *R(VIRTIO_MMIO_INTERRUPT_STATUS) & 0x3;
-
-  while (gpu.used_idx != gpu.used->idx) {
-    int id = gpu.used->ring[gpu.used_idx % NUM].id;
-
-    gpu.used_idx += 1;
-  }
-}

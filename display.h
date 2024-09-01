@@ -2,7 +2,6 @@
 #define DISPLAY_H
 
 #include "types.h"
-#include "virtq.h"
 
 #define FB_BASE 0x40000000
 #define FB_WIDTH 640
@@ -139,8 +138,6 @@ struct virtio_gpu_update_cursor {
 };
 
 void virtq_init();
-void virtio_gpu_send_command(void *cmd, int len);
 void virtio_gpu_init();
 void virtio_gpu_draw_rectangle();
-
 #endif
