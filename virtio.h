@@ -45,6 +45,13 @@
 #define VIRTQ_DESC_F_WRITE 0x2
 #define VIRTQ_DESC_F_USED 0x4
 
+#define VIRTIO_MMIO_QUEUE_DESC_LOW 0x038
+#define VIRTIO_MMIO_QUEUE_DESC_HIGH 0x03C
+#define VIRTIO_MMIO_QUEUE_AVAIL_LOW 0x040
+#define VIRTIO_MMIO_QUEUE_AVAIL_HIGH 0x044
+#define VIRTIO_MMIO_QUEUE_USED_LOW 0x048
+#define VIRTIO_MMIO_QUEUE_USED_HIGH 0x04C
+
 struct virtq_desc {
   uint64 addr;
   uint32 len;
@@ -55,7 +62,7 @@ struct virtq_desc {
 struct virtq_avail {
   uint16 flags;
   uint16 idx;
-  uint16 ring[VIRTIO_QUEUE_SIZE];
+  uint16 ring[];
 };
 
 struct virtq_used_elem {
@@ -66,13 +73,7 @@ struct virtq_used_elem {
 struct virtq_used {
   uint16 flags;
   uint16 idx;
-  struct virtq_used_elem ring[VIRTIO_QUEUE_SIZE];
-};
-
-struct virtq {
-  struct virtq_desc desc[VIRTIO_QUEUE_SIZE];
-  struct virtq_avail avail;
-  struct virtq_used used;
+  struct virtq_used_elem ring[];
 };
 
 void virtio_gpu_send_command(void *cmd, int len);

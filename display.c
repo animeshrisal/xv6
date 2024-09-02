@@ -1,8 +1,16 @@
 #include "display.h"
 #include "kernel.h"
+#include "talloc.h"
 #include "virtio.h"
 
 #define NUM 8
+
+static struct gpu {
+  struct virtq_desc *desc;
+  struct virtq_avail *avail;
+  struct virtq_used *used;
+} gpu;
+
 // Define feature bits for Virtio GPU
 void *memset(void *dst, int c, uint16 n) {
   char *cdst = (char *)dst;
@@ -11,7 +19,7 @@ void *memset(void *dst, int c, uint16 n) {
     cdst[i] = c;
   }
   return dst;
-}
+};
 
 void create_2d_resource(int virtio_gpu_fd) {
   struct virtio_gpu_resource_create_2d create_2d_cmd = {
@@ -110,17 +118,42 @@ void virtio_gpu_init() {
     return;
   }
 
+  // initialize queue 0.
   *R(VIRTIO_MMIO_QUEUE_SEL) = 0;
-  // Ensure queue 0 is not in use
+
+  // ensure queue 0 is not in use.
   if (*R(VIRTIO_MMIO_QUEUE_READY)) {
-    printastring("Queue is being used");
+    printastring("virtio disk should not be ready");
+  };
+
+  gpu.desc = talloc();
+  gpu.avail = talloc();
+  gpu.used = talloc();
+
+  if (!gpu.desc || !gpu.avail || !gpu.used) {
+    printastring("Could not allocate memory");
     return;
   }
 
+  memset(gpu.desc, 0, 4096);
+  memset(gpu.avail, 0, 4096);
+  memset(gpu.desc, 0, 4096);
+
+  // set queue size.
+  *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;
+
+  *R(VIRTIO_MMIO_QUEUE_DESC_LOW) = (uint64)gpu.desc;
+  *R(VIRTIO_MMIO_QUEUE_DESC_HIGH) = (uint64)gpu.desc >> 32;
+  *R(VIRTIO_MMIO_QUEUE_AVAIL_LOW) = (uint64)gpu.avail;
+  *R(VIRTIO_MMIO_QUEUE_AVAIL_HIGH) = (uint64)gpu.avail >> 32;
+  *R(VIRTIO_MMIO_QUEUE_USED_LOW) = (uint64)gpu.used;
+  *R(VIRTIO_MMIO_QUEUE_USED_HIGH) = (uint64)gpu.used >> 32;
+
+  // queue is ready.
+  *R(VIRTIO_MMIO_QUEUE_READY) = 0x1;
+
   // Set the DRIVER_OK status bit
   *R(VIRTIO_MMIO_STATUS) |= VIRTIO_CONFIG_S_DRIVER_OK;
-
-  // Print final status
   status = *R(VIRTIO_MMIO_STATUS);
   printastring("GPU Driver initialized!");
 
@@ -130,16 +163,13 @@ void virtio_gpu_init() {
       .format = VIRTIO_GPU_FORMAT_B8G8R8A8_UNORM,
       .width = 640,
       .height = 480};
-  virtio_gpu_send_command(&create_cmd, sizeof(create_cmd));
 
   struct virtio_gpu_resource_attach_backing attach_cmd = {
       .hdr.type = VIRTIO_GPU_CMD_RESOURCE_ATTACH_BACKING,
       .resource_id = 1,
       .nr_entries = 1,
   };
-  virtio_gpu_send_command(&attach_cmd, sizeof(attach_cmd));
 
-  // Transfer the framebuffer to the GPU
   struct virtio_gpu_rect rect = {
       .x = 0,
       .y = 0,
@@ -152,13 +182,10 @@ void virtio_gpu_init() {
       .offset = 0,
       .resource_id = 1,
   };
-  virtio_gpu_send_command(&transfer_cmd, sizeof(transfer_cmd));
-
   // Set the scanout to display the framebuffer
   struct virtio_gpu_resp_display_info set_scanout_cmd = {
       .hdr.type = VIRTIO_GPU_CMD_SET_SCANOUT,
       .pmodes[0].r = rect,
       .pmodes[0].enabled = 1,
   };
-  virtio_gpu_send_command(&set_scanout_cmd, sizeof(set_scanout_cmd));
-};
+}

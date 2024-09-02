@@ -1,3 +1,4 @@
+#include "display.h"
 #include "hardware.h"
 #include "riscv.h"
 #include "syscalls.h"
