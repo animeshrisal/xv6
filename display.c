@@ -1,6 +1,7 @@
 #include "display.h"
 #include "kernel.h"
 #include "talloc.h"
+#include "tprintf.h"
 #include "virtio.h"
 
 #define NUM 8
@@ -82,9 +83,10 @@ void virtio_gpu_init() {
   uint32 status = 0;
 
   if (*R(VIRTIO_MMIO_MAGIC_VALUE) != 0x74726976) {
-    printastring("Could not find virtio\n");
+    tprintf("Could not find the magic value!\n");
+
   } else if (*R(VIRTIO_MMIO_DEVICE_ID) != 16) {
-    printastring("GPU is not connected!\n");
+    tprintf("Could not find driver device id!\n");
   }
 
   // Reset device status
@@ -106,7 +108,7 @@ void virtio_gpu_init() {
   features &= (VIRTIO_GPU_F_EDID | VIRTIO_GPU_F_VIRGL);
 
   *R(VIRTIO_MMIO_DRIVER_FEATURES) = features;
-
+  tprintf("Set features!\n");
   // Notify device that feature negotiation is complete
   *R(VIRTIO_MMIO_STATUS) |= VIRTIO_CONFIG_S_FEATURES_OK;
 
@@ -114,24 +116,26 @@ void virtio_gpu_init() {
   status = *R(VIRTIO_MMIO_STATUS);
 
   if (!(status & VIRTIO_CONFIG_S_FEATURES_OK)) {
-    printastring("ERROR!");
+    tprintf("Could not negotiate features\n");
     return;
   }
 
+  tprintf("Negotiated feature!\n");
   // initialize queue 0.
   *R(VIRTIO_MMIO_QUEUE_SEL) = 0;
 
   // ensure queue 0 is not in use.
   if (*R(VIRTIO_MMIO_QUEUE_READY)) {
-    printastring("virtio disk should not be ready");
+    tprintf("Queue is not ready\n");
   };
 
   gpu.desc = talloc();
   gpu.avail = talloc();
   gpu.used = talloc();
 
+  tprintf("Allocating memory!\n");
   if (!gpu.desc || !gpu.avail || !gpu.used) {
-    printastring("Could not allocate memory");
+    tprintf("Could not allocate memory\n");
     return;
   }
 
@@ -155,7 +159,8 @@ void virtio_gpu_init() {
   // Set the DRIVER_OK status bit
   *R(VIRTIO_MMIO_STATUS) |= VIRTIO_CONFIG_S_DRIVER_OK;
   status = *R(VIRTIO_MMIO_STATUS);
-  printastring("GPU Driver initialized!");
+
+  tprintf("GPU initialized\n");
 
   struct virtio_gpu_resource_create_2d create_cmd = {
       .ctrl_header.type = VIRTIO_GPU_CMD_RESOURCE_CREATE_2D,
@@ -188,4 +193,8 @@ void virtio_gpu_init() {
       .pmodes[0].r = rect,
       .pmodes[0].enabled = 1,
   };
+}
+
+void virtio_gpu_intr() {
+  *R(VIRTIO_MMIO_INTERRUPT_ACK) = *R(VIRTIO_MMIO_INTERRUPT_STATUS) & 0x3;
 }

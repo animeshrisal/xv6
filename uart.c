@@ -17,10 +17,17 @@ void uart_intr(void) {
       break;
     }
 
-    uartputc_sync(c);
+    if (c == 0x100) {
+      uartputc_sync('\b');
+      uartputc_sync(' ');
+      uartputc_sync('\b');
+
+    } else {
+      uartputc_sync(c);
+    }
   }
 
-  // uart_start();
+  uart_start();
 }
 
 void upart_putc(int c) {
