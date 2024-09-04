@@ -18,3 +18,22 @@ struct uart {
   uint8 MCR; // R/W = modem control register (offset 4)
   uint8 LSR; // R   = line status register (offset 5)
 };
+
+// core local interrupto (CLINT)
+#define CLINT 0x2000000L
+#define CLINT_MTIMECMP(hartid) (CLINT + 0x4000 + 8 * (hartid))
+#define CLINT_MTIME (CLINT + 0xBFF8) // cycles since boot
+
+// platform level interrupt controller (PLIC)
+#define PLIC 0x0C000000L
+#define PLIC_PRIORITY (PLIC + 0x0)
+#define PLIC_PENDING (PLIC + 0x1000)
+#define PLIC_MENABLE (PLIC + 0x2000)
+#define PLIC_MPRIORITY (PLIC + 0x200000)
+#define PLIC_MCLAIM (PLIC + 0x200004)
+
+#define UART0_IRQ 10
+#define VIRTIO_IRQ 1
+
+#define MTI 7
+#define MEI 11

@@ -35,7 +35,7 @@ void tfree(void *pa) {
 
   if (((uint64)pa % PGSIZE) != 0 || (uint8 *)pa < end ||
       (uint64)pa >= PHYSTOP) {
-    printastring("ERROR");
+    // printastring("ERROR");
     return;
   }
 

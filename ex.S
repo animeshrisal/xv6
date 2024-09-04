@@ -39,7 +39,7 @@ ex:
         sd t6, 240(sp)
 
         // call the C trap handler in trap.c
-        call exception
+        call kernel_trap
 
         // restore registers.
         ld ra, 0(sp)
