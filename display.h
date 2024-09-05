@@ -139,5 +139,7 @@ struct virtio_gpu_update_cursor {
 
 void virtq_init();
 void virtio_gpu_init();
+void virtio_gpu_intr();
 void virtio_gpu_draw_rectangle();
+static void gpu_initialize();
 #endif

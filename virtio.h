@@ -23,10 +23,10 @@
 #define VIRTIO_MMIO_STATUS 0x070
 #define VIRTIO_MMIO_QUEUE_DESC_LOW 0x080
 #define VIRTIO_MMIO_QUEUE_DESC_HIGH 0x084
-#define VIRTIO_MMIO_QUEUE_DRIVER_LOW 0x090
-#define VIRTIO_MMIO_QUEUE_DRIVER_HIGH 0x094
-#define VIRTIO_MMIO_QUEUE_DEVICE_LOW 0x0A0
-#define VIRTIO_MMIO_QUEUE_DEVICE_HIGH 0x0A4
+#define VIRTIO_MMIO_QUEUE_AVAIL_LOW 0x090
+#define VIRTIO_MMIO_QUEUE_AVAIL_HIGH 0x094
+#define VIRTIO_MMIO_QUEUE_USED_LOW 0x0A0
+#define VIRTIO_MMIO_QUEUE_USED_HIGH 0x0A4
 #define VIRTIO_MMIO_CONFIG_GENERATION 0x0FC
 #define VIRTIO_MMIO_CONFIG_BASE 0x100
 // virtio mmio interface
@@ -53,13 +53,6 @@
 #define VIRTQ_DESC_F_NEXT 0x1
 #define VIRTQ_DESC_F_WRITE 0x2
 #define VIRTQ_DESC_F_USED 0x4
-
-#define VIRTIO_MMIO_QUEUE_DESC_LOW 0x038
-#define VIRTIO_MMIO_QUEUE_DESC_HIGH 0x03C
-#define VIRTIO_MMIO_QUEUE_AVAIL_LOW 0x040
-#define VIRTIO_MMIO_QUEUE_AVAIL_HIGH 0x044
-#define VIRTIO_MMIO_QUEUE_USED_LOW 0x048
-#define VIRTIO_MMIO_QUEUE_USED_HIGH 0x04C
 
 struct virtq_desc {
   uint64 addr;
@@ -90,6 +83,6 @@ void virtq_init(struct virtq *vq);
 void virtq_free_desc(struct virtq *vq, int index);
 void virtq_add_to_avail(struct virtq *vq, int desc_index);
 void virtq_wait_for_used(struct virtq *vq);
-int virtq_alloc_desc(struct virtq *vq);
+static int virtq_alloc_desc();
 
 #endif

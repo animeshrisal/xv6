@@ -1,8 +1,12 @@
 #include "plic.h"
 #include "hardware.h"
 #include "types.h"
+#include "virtio.h"
 
-void plic_init(void) { *(uint32 *)(PLIC + UART0_IRQ * 4) = 1; }
+void plic_init(void) {
+  *(uint32 *)(PLIC + UART0_IRQ * 4) = 1;
+  *(uint32 *)(PLIC + VIRTIO0_IRQ * 4) = 1;
+}
 
 int plic_claim(void) {
   int irq = *(uint32 *)PLIC_MCLAIM;
