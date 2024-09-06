@@ -1,10 +1,21 @@
 #include "display.h"
 #include "kernel.h"
+#include "mem.h"
 #include "talloc.h"
 #include "tprintf.h"
+#include "types.h"
 #include "virtio.h"
 
 #define NUM 8
+
+void *memset(void *dst, int c, uint16 n) {
+  char *cdst = (char *)dst;
+  int i;
+  for (i = 0; i < n; i++) {
+    cdst[i] = c;
+  }
+  return dst;
+}
 
 static struct gpu {
   struct virtq_desc *desc;
@@ -14,16 +25,6 @@ static struct gpu {
   char free[NUM];
   uint16 used_idx;
 } gpu;
-
-// Define feature bits for Virtio GPU
-void *memset(void *dst, int c, uint16 n) {
-  char *cdst = (char *)dst;
-  int i;
-  for (i = 0; i < n; i++) {
-    cdst[i] = c;
-  }
-  return dst;
-};
 
 void create_2d_resource(int virtio_gpu_fd) {
   struct virtio_gpu_resource_create_2d create_2d_cmd = {
@@ -66,30 +67,16 @@ void transfer_to_host_2d(int virtio_gpu_fd) {
   };
 };
 
-void set_scanout(int virtio_gpu_fd) {
-  struct virtio_gpu_rect rect = {.x = 0, .y = 0, .width = 10, .height = 10};
-  struct virtio_gpu_resp_display_info display_info_cmd = {
-      .hdr.type = VIRTIO_GPU_CMD_SET_SCANOUT,
-      .pmodes[0].r = rect,
-      .pmodes[0].enabled = 1};
-};
-
-void virtq_initiazation() {
-
-  *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;
-  *R(VIRTIO_MMIO_QUEUE_READY) = 0x1;
-}
-
 void virtio_gpu_init() {
   // Create a 2D resource
   // reset device
   uint32 status = 0;
 
-  if (*R(VIRTIO_MMIO_MAGIC_VALUE) != 0x74726976) {
-    tprintf("Could not find the magic value!\n");
+  if (*R(VIRTIO_MMIO_MAGIC_VALUE) != 0x74726976 ||
+      *R(VIRTIO_MMIO_VERSION) != 0x2 || *R(VIRTIO_MMIO_DEVICE_ID) != 16) {
 
-  } else if (*R(VIRTIO_MMIO_DEVICE_ID) != 16) {
-    tprintf("Could not find driver device id!\n");
+    tprintf("Could not find virtio gpu\n");
+    return;
   }
 
   // Reset device status
@@ -152,9 +139,9 @@ void virtio_gpu_init() {
     return;
   }
 
-  memset(gpu.desc, 0, 4096);
-  memset(gpu.avail, 0, 4096);
-  memset(gpu.desc, 0, 4096);
+  tmemset(gpu.desc, 0, 4096);
+  tmemset(gpu.avail, 0, 4096);
+  tmemset(gpu.desc, 0, 4096);
 
   // set queue size.
   *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;
@@ -175,15 +162,37 @@ void virtio_gpu_init() {
   // tell device we're completely ready.
   status |= VIRTIO_CONFIG_S_DRIVER_OK;
   *R(VIRTIO_MMIO_STATUS) = status;
-  tprintf("GPU initialized\n");
+  // Verify FEATURES_OK is set
+  status = *R(VIRTIO_MMIO_STATUS);
 
-  uint32 status2 = *R(VIRTIO_MMIO_STATUS);
+  if (!(status & VIRTIO_CONFIG_S_DRIVER_OK)) {
+    tprintf("Could not initialize\n");
+    return;
+  }
+
+  tprintf("GPU initialized!\n");
   gpu_initialize();
 }
 
+static void free_desc(int i) {
+  gpu.desc[i].addr = 0;
+  gpu.desc[i].len = 0;
+  gpu.desc[i].flags = 0;
+  gpu.desc[i].next = 0;
+  gpu.free[i] = 1;
+}
+
 void virtio_gpu_intr() {
-  *R(VIRTIO_MMIO_INTERRUPT_ACK) = *R(VIRTIO_MMIO_INTERRUPT_STATUS) & 0x3;
-  tprintf("Virtio gpu interrupted");
+  uint32 status = *R(VIRTIO_MMIO_INTERRUPT_STATUS);
+  *R(VIRTIO_MMIO_INTERRUPT_ACK) = status;
+  tprintf("GPU Interrupted\n");
+
+  while (gpu.used_idx != gpu.used->idx) {
+    int id = gpu.used->ring[gpu.used_idx % NUM].id;
+    gpu.used_idx += 1;
+  }
+
+  tprintf("Processed!");
 }
 
 static int alloc_desc() {
@@ -196,38 +205,48 @@ static int alloc_desc() {
   return -1;
 }
 
-static void free_desc(int i) {
-  gpu.desc[i].addr = 0;
-  gpu.desc[i].len = 0;
-  gpu.desc[i].flags = 0;
-  gpu.desc[i].next = 0;
-  gpu.free[i] = 1;
-}
-
-static void create_descriptor(void *cmd, int size) {
-  int idx = alloc_desc();           // Allocate a descriptor
+static int create_descriptor(void *cmd, int size, uint16 flags) {
+  int idx = alloc_desc(); // Allocate a descriptor
+  if (idx < 0) {
+    tprintf("Failed to allocate descriptor\n");
+    return -1;
+  }
   gpu.desc[idx].addr = (uint64)cmd; // Set the address of the command
   gpu.desc[idx].len = size;         // Set the size of the command
   gpu.desc[idx].flags =
-      VIRTQ_DESC_F_WRITE; // Set descriptor flags (e.g., write)
-  //
-  gpu.desc[idx].next = 0; // No next descriptor in chain
+      flags == VIRTQ_DESC_F_NEXT
+          ? VIRTQ_DESC_F_NEXT
+          : VIRTQ_DESC_F_WRITE; // Set descriptor flags (e.g., write)
+  gpu.desc[idx].next = flags == VIRTQ_DESC_F_NEXT
+                           ? idx + 1 % NUM
+                           : 0; // No next descriptor in chain
 
-  gpu.avail->ring[gpu.avail->idx % NUM] =
-      idx;             // Add descriptor to the available ring
-  gpu.avail->idx += 1; // Update the available index
+  return idx;
+}
 
-  free_desc(idx); // Free the descriptor after command has been used
+static void free_chain(int i) {
+  while (1) {
+    int flag = gpu.desc[i].flags;
+    int nxt = gpu.desc[i].next;
+    free_desc(i);
+    if (flag & VIRTQ_DESC_F_NEXT)
+      i = nxt;
+    else
+      break;
+  }
 }
 
 void gpu_initialize() {
+
+  struct virtio_gpu_rect rect = {.x = 0, .y = 0, .width = 640, .height = 480};
+
   // Command to create a 2D resource
   struct virtio_gpu_resource_create_2d create_cmd = {
       .ctrl_header.type = VIRTIO_GPU_CMD_RESOURCE_CREATE_2D,
       .resource_id = 1,
       .format = VIRTIO_GPU_FORMAT_B8G8R8A8_UNORM,
-      .width = 1920,
-      .height = 1080};
+      .width = 640,
+      .height = 480};
 
   // Command to attach backing to the resource
   struct virtio_gpu_resource_attach_backing attach_cmd = {
@@ -235,9 +254,13 @@ void gpu_initialize() {
       .resource_id = 1,
       .nr_entries = 1};
 
-  // Define the rectangle dimensions
-  struct virtio_gpu_rect rect = {.x = 0, .y = 0, .width = 640, .height = 480};
+  struct virtio_gpu_cmd_set_scanout scanout_cmd = {
+      .hdr.type = VIRTIO_GPU_CMD_SET_SCANOUT,
+      .r = rect,
+      .resource_id = 1,
+      .scanout_id = 0};
 
+  // Define the rectangle dimensions
   // Command to transfer the 2D resource to the host
   struct virtio_gpu_transfer_to_host_2d transfer_cmd = {
       .hdr.type = VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D,
@@ -245,16 +268,41 @@ void gpu_initialize() {
       .offset = 0,
       .resource_id = 1};
 
-  // Set the scanout to display the framebuffer
-  struct virtio_gpu_resp_display_info set_scanout_cmd = {
-      .hdr.type = VIRTIO_GPU_CMD_SET_SCANOUT,
-      .pmodes[0].r = rect,
-      .pmodes[0].enabled = 1,
-  }; // Create descriptors for each command and add them to the ring
-  create_descriptor(&create_cmd, sizeof(create_cmd));
-  create_descriptor(&attach_cmd, sizeof(attach_cmd));
-  create_descriptor(&transfer_cmd, sizeof(transfer_cmd));
-  create_descriptor(&set_scanout_cmd, sizeof(set_scanout_cmd));
+  // Command to flush the resource
+  struct virtio_gpu_resource_flush resource_flush_cmd = {
+      .hdr.type = VIRTIO_GPU_CMD_RESOURCE_FLUSH,
+      .r = rect,
+      .padding = 0,
+      .resource_id = 1};
+
+  // Create descriptors for each command and add them to the ring
+  // create 2d resource
+  create_descriptor(&create_cmd, sizeof(create_cmd), VIRTQ_DESC_F_NEXT);
+  create_descriptor(&create_cmd.ctrl_header, sizeof(create_cmd.ctrl_header), 0);
+
+  // create_descriptor(&attach_cmd, sizeof(attach_cmd), VIRTQ_DESC_F_NEXT);
+  // create_descriptor(&attach_cmd, sizeof(scanout_cmd), VIRTQ_DESC_F_NEXT);
+  // create_descriptor(&transfer_cmd, sizeof(transfer_cmd), VIRTQ_DESC_F_NEXT);
+  int idx =
+      create_descriptor(&resource_flush_cmd, sizeof(resource_flush_cmd), 0);
+
+  gpu.avail->ring[gpu.avail->idx % NUM] =
+      idx; // Add descriptor to the available ring
+  //
+  gpu.avail->idx = gpu.avail->idx + 1;
+  //
+  create_descriptor(&attach_cmd, sizeof(attach_cmd), VIRTQ_DESC_F_NEXT);
+
+  struct virtio_gpu_mem_entry mem_entry = {
+      .addr = 0, .length = 0, .padding = 0};
+
+  create_descriptor(&attach_cmd, sizeof(attach_cmd), VIRTQ_DESC_F_NEXT);
+  create_descriptor(&mem_entry, sizeof(mem_entry), VIRTQ_DESC_F_NEXT);
+  idx = create_descriptor(&attach_cmd.hdr, sizeof(attach_cmd.hdr), 0);
+  gpu.avail->ring[gpu.avail->idx % NUM] =
+      idx; // Add descriptor to the available ring
+  //
+  gpu.avail->idx += 1;
 
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }

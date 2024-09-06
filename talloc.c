@@ -24,11 +24,14 @@ void tmemcpy(uint8 *source, uint8 *dest, int n) {
   }
 }
 
-void tmemset(uint8 *dest, uint8 val, uint32 len) {
-  uint8 *temp = (uint8 *)dest;
-  for (; len != 0; len--)
-    *temp++ = val;
-}
+void *tmemset(void *dst, int c, uint16 n) {
+  uint8 *cdst = (uint8 *)dst;
+  int i;
+  for (i = 0; i < n; i++) {
+    cdst[i] = c;
+  }
+  return dst;
+};
 
 void tfree(void *pa) {
   struct run *r;

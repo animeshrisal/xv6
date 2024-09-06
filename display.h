@@ -109,6 +109,20 @@ struct virtio_gpu_resource_attach_backing {
   uint32 nr_entries;
 };
 
+struct virtio_gpu_cmd_set_scanout {
+  struct ctrl_header hdr;
+  struct virtio_gpu_rect r;
+  uint32 scanout_id;
+  uint32 resource_id;
+};
+
+struct virtio_gpu_resource_flush {
+  struct ctrl_header hdr;
+  struct virtio_gpu_rect r;
+  uint32 resource_id;
+  uint32 padding;
+};
+
 struct virtio_gpu_mem_entry {
   uint64 addr;
   uint32 length;
@@ -142,4 +156,11 @@ void virtio_gpu_init();
 void virtio_gpu_intr();
 void virtio_gpu_draw_rectangle();
 static void gpu_initialize();
+
+typedef struct Pixel {
+  uint8 R;
+  uint8 G;
+  uint8 B;
+  uint8 a;
+} Pixel;
 #endif

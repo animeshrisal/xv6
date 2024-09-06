@@ -20,8 +20,7 @@ int dev_intr() {
     int irq = plic_claim();
     if (irq == UART0_IRQ) {
       uart_intr();
-    } else if (irq == VIRTIO_IRQ) {
-      tprintf("REEEE");
+    } else if (irq == 8) {
       virtio_gpu_intr();
     } else {
       tprintf("Wrong interrupt");
