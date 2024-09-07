@@ -1,4 +1,5 @@
 #include "hardware.h"
+#include "plic.h"
 #include "riscv.h"
 #include "types.h"
 
@@ -7,6 +8,7 @@ extern void ex(void);
 extern void printstring(char *);
 extern void printhex(uint64);
 
+/*
 void interrupt_init(void) {
   // set desired IRQ priorities non-zero (otherwise disabled).
   *(uint32 *)(PLIC + UART0_IRQ * 4) = 1;
@@ -20,6 +22,7 @@ void interrupt_init(void) {
   // enable machine-mode external interrupts.
   w_mie(r_mie() | MIE_MEIE);
 }
+*/
 
 void setup(void) {
   // set M Previous Privilege mode to User so mret returns to user mode.
@@ -47,7 +50,8 @@ void setup(void) {
   // set M Exception Program Counter to main, for mret, requires gcc
   // -mcmodel=medany
   //
-  interrupt_init();
+  plic_init();
+  w_mie(r_mie() | MIE_MEIE);
   w_mepc((uint64)main);
 
   // switch to user mode (configured in mstatus) and jump to address in mepc CSR
