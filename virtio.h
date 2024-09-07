@@ -31,7 +31,7 @@
 #define VIRTIO_MMIO_CONFIG_BASE 0x100
 // virtio mmio interface
 #define VIRTIO0 0x10008000
-#define VIRTIO0_IRQ 1
+#define VIRTIO0_IRQ 8
 
 // status register bits, from qemu virtio_config.h
 #define VIRTIO_CONFIG_S_ACKNOWLEDGE 0x1

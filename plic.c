@@ -5,9 +5,9 @@
 #include "virtio.h"
 
 void plic_init(void) {
-  *(uint32 *)(PLIC + UART0_IRQ * 4) = 2;
+  *(uint32 *)(PLIC + UART0_IRQ * 4) = 1;
 
-  *(uint32 *)(PLIC + 8 * 4) = 1;
+  *(uint32 *)(PLIC + VIRTIO0_IRQ * 4) = 1;
 
   // set enable bits for this hart's S-mode
   // for the uart and virtio gpu.

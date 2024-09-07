@@ -2,7 +2,7 @@
 #include "types.h"
 
 extern uint64 sys_write(void);
-
+/*
 static uint64 (*syscalls[])(void) = {[SYS_write] sys_write}
 
 void syscall(void) {
@@ -16,3 +16,4 @@ void syscall(void) {
     printastring("Invalid syscall")
   }
 };
+  */
