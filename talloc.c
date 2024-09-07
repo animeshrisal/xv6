@@ -3,7 +3,7 @@
 
 #define PGSIZE 4096
 #define KERNBASE 0x80000000L
-#define PHYSTOP (KERNBASE + 128 * 1024 * 1024)
+#define PHYSTOP (KERNBASE + 512 * 1024 * 1024)
 #define PGROUNDUP(sz) (((sz) + PGSIZE - 1) & ~(PGSIZE - 1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE - 1))
 
@@ -71,6 +71,21 @@ void *talloc(void) {
 
   if (r) {
     tmemset((uint8 *)r, 5, PGSIZE);
+  }
+
+  return (void *)r;
+}
+
+void *talloc_with_size(int size) {
+  struct run *r;
+  r = tmem.freelist;
+
+  if (r) {
+    tmem.freelist = r->next;
+  }
+
+  if (r) {
+    tmemset((uint8 *)r, 5, size);
   }
 
   return (void *)r;
