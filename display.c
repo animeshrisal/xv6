@@ -1,6 +1,5 @@
 #include "display.h"
 #include "kernel.h"
-#include "mem.h"
 #include "talloc.h"
 #include "tprintf.h"
 #include "types.h"
