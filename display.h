@@ -152,6 +152,7 @@ void virtio_gpu_init();
 void virtio_gpu_intr();
 void virtio_gpu_draw_rectangle();
 static void gpu_initialize();
+void transfer(int color);
 
 typedef struct Pixel {
   uint8 R;

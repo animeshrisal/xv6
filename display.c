@@ -138,7 +138,6 @@ void virtio_gpu_init() {
   tmemset(gpu.desc, 0, 4096);
   tmemset(gpu.avail, 0, 4096);
   tmemset(gpu.desc, 0, 4096);
-  tmemset(gpu.framebuffer, 0, gpu.width * gpu.height * sizeof(Pixel));
   //  set queue size.
   *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;
 
@@ -238,8 +237,8 @@ static int create_descriptor(void *cmd, int size, uint16 flags) {
 
 void gpu_transfer() {}
 
-void fill_rects() {
-  Pixel white = {.R = 255, .G = 255, .B = 255, .A = 255};
+void fill_rects(int color) {
+  Pixel white = {.R = color, .G = color, .B = color, .A = color};
 
   for (int i = 0; i < gpu.width * gpu.height; i++) {
     gpu.framebuffer[i] = white;
@@ -247,7 +246,7 @@ void fill_rects() {
 }
 
 void gpu_initialize() {
-  fill_rects();
+  fill_rects(255);
   struct virtio_gpu_rect rect = {.x = 0, .y = 0, .width = 640, .height = 480};
 
   // Command to create a 2D resource
@@ -280,12 +279,6 @@ void gpu_initialize() {
 
   // Command to flush the resource
   struct virtio_gpu_resource_flush resource_flush_cmd = {
-      .hdr.type = VIRTIO_GPU_CMD_RESOURCE_FLUSH,
-      .r = {.x = 0, .y = 0, .width = 640, .height = 480},
-      .padding = 0,
-      .resource_id = 1};
-
-  struct virtio_gpu_resource_flush resource_flush_cmd2 = {
       .hdr.type = VIRTIO_GPU_CMD_RESOURCE_FLUSH,
       .r = {.x = 0, .y = 0, .width = 640, .height = 480},
       .padding = 0,
@@ -329,6 +322,50 @@ void gpu_initialize() {
 
   gpu.avail->idx += 1;
 
+  idx =
+      create_descriptor(&transfer_cmd, sizeof(transfer_cmd), VIRTQ_DESC_F_NEXT);
+  struct ctrl_header hdr4;
+
+  create_descriptor(&hdr4, sizeof(hdr4), 0);
+  gpu.avail->ring[gpu.avail->idx % NUM] =
+      idx; // Add descriptor to the available ring
+
+  gpu.avail->idx += 1;
+
+  // Create descriptors for each command and add them to the ring
+  // create 2d resource
+  idx = create_descriptor(&resource_flush_cmd, sizeof(resource_flush_cmd),
+                          VIRTQ_DESC_F_NEXT);
+  struct ctrl_header hdr5;
+
+  create_descriptor(&hdr5, sizeof(hdr5), 0);
+  gpu.avail->ring[gpu.avail->idx % NUM] =
+      idx; // Add descriptor to the available ring
+
+  gpu.avail->idx += 1;
+
+  *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
+}
+
+void transfer(int color) {
+
+  fill_rects(color);
+  // Define therectangle dimensions
+  // Command to transfer the 2D resource to the host
+  struct virtio_gpu_transfer_to_host_2d transfer_cmd = {
+      .hdr.type = VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D,
+      .r = {.x = 0, .y = 0, .width = 640, .height = 480},
+      .offset = 0,
+      .resource_id = 1};
+
+  // Command to flush the resource
+  struct virtio_gpu_resource_flush resource_flush_cmd = {
+      .hdr.type = VIRTIO_GPU_CMD_RESOURCE_FLUSH,
+      .r = {.x = 0, .y = 0, .width = 640, .height = 480},
+      .padding = 0,
+      .resource_id = 1};
+
+  int idx;
   idx =
       create_descriptor(&transfer_cmd, sizeof(transfer_cmd), VIRTQ_DESC_F_NEXT);
   struct ctrl_header hdr4;
