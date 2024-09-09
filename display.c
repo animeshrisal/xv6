@@ -192,18 +192,14 @@ static void free_chain(int i) {
 void virtio_gpu_intr() {
   uint32 status = *R(VIRTIO_MMIO_INTERRUPT_STATUS);
   *R(VIRTIO_MMIO_INTERRUPT_ACK) = status & 0x3;
-  tprintf("GPU Interrupted\n");
 
   while (gpu.used_idx != gpu.used->idx) {
 
     int id = gpu.used->ring[gpu.used_idx % NUM].id;
-    tprintf("Processing!");
     // struct virtq_desc desc = gpu.desc[id];
     free_chain(id);
     gpu.used_idx = gpu.used_idx + 1;
   }
-
-  tprintf("Processed!");
 }
 
 static int alloc_desc() {
@@ -238,9 +234,12 @@ static int create_descriptor(void *cmd, int size, uint16 flags) {
 void gpu_transfer() {}
 
 void fill_rects(int color) {
-  Pixel white = {.R = color, .G = color, .B = color, .A = color};
 
   for (int i = 0; i < gpu.width * gpu.height; i++) {
+    Pixel white = {.R = (color + i) % 255,
+                   .G = (254 - color + i) % 255,
+                   .B = color,
+                   .A = color};
     gpu.framebuffer[i] = white;
   }
 }
@@ -390,3 +389,5 @@ void transfer(int color) {
 
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }
+
+uint64 get_framebuffer() { return &gpu.framebuffer; }

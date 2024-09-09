@@ -1,9 +1,10 @@
 #include "syscall.h"
+#include "tprintf.h"
 #include "types.h"
 
-extern uint64 sys_write(void);
-/*
-static uint64 (*syscalls[])(void) = {[SYS_write] sys_write}
+extern uint64 sys_uprintf(void);
+
+static uint64 (*syscalls[])(void) = {[SYS_uprintf] sys_uprintf};
 
 void syscall(void) {
   uint64 syscall;
@@ -13,7 +14,6 @@ void syscall(void) {
   if (syscall < 2) {
     asm volatile("mv a0, %0" : : "r"(syscalls[syscall]()))
   } else {
-    printastring("Invalid syscall")
+    tprintf("Invalid syscall")
   }
 };
-  */

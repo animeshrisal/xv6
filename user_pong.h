@@ -1,0 +1,1 @@
+int user_init() {}

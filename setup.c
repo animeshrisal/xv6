@@ -1,6 +1,8 @@
 #include "hardware.h"
 #include "plic.h"
 #include "riscv.h"
+#include "tprintf.h"
+#include "trap.h"
 #include "types.h"
 
 extern int main(void);
@@ -50,7 +52,10 @@ void setup(void) {
   // set M Exception Program Counter to main, for mret, requires gcc
   // -mcmodel=medany
   //
+
+  // proc_init();
   plic_init();
+  clock_intr();
   w_mie(r_mie() | MIE_MEIE);
   w_mepc((uint64)main);
 
@@ -58,5 +63,3 @@ void setup(void) {
   // -> main().
   asm volatile("mret");
 }
-
-void timerinit() { w_mie(r_mie() | MSTATUS_MIE); }

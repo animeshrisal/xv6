@@ -59,8 +59,4 @@ int uart_getc(void) {
   }
 }
 
-void uartputc_sync(int c) {
-  while ((uart0->LSR & (1 << 5)) == 0)
-    ; // polling!
-  uart0->THR = c;
-}
+void uartputc_sync(int c) { uart0->THR = c; }
