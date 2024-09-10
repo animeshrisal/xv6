@@ -1,1 +1,2 @@
-int user_init() {}
+int user_init();
+int gpuinit();

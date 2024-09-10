@@ -28,6 +28,8 @@ static struct gpu {
   uint32 height;
 } gpu;
 
+uint64 get_framebuffer() { return (uint64)gpu.framebuffer; }
+
 void create_2d_resource(int virtio_gpu_fd) {
   struct virtio_gpu_resource_create_2d create_2d_cmd = {
       .ctrl_header.type = VIRTIO_GPU_CMD_RESOURCE_CREATE_2D,
@@ -135,9 +137,11 @@ void virtio_gpu_init() {
     return;
   }
 
+  /*
   tmemset(gpu.desc, 0, 4096);
   tmemset(gpu.avail, 0, 4096);
   tmemset(gpu.desc, 0, 4096);
+  */
   //  set queue size.
   *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;
 
@@ -233,19 +237,7 @@ static int create_descriptor(void *cmd, int size, uint16 flags) {
 
 void gpu_transfer() {}
 
-void fill_rects(int color) {
-
-  for (int i = 0; i < gpu.width * gpu.height; i++) {
-    Pixel white = {.R = (color + i) % 255,
-                   .G = (254 - color + i) % 255,
-                   .B = color,
-                   .A = color};
-    gpu.framebuffer[i] = white;
-  }
-}
-
 void gpu_initialize() {
-  fill_rects(255);
   struct virtio_gpu_rect rect = {.x = 0, .y = 0, .width = 640, .height = 480};
 
   // Command to create a 2D resource
@@ -298,6 +290,7 @@ void gpu_initialize() {
   // Create descriptors for each command and add them to the ring
   // create 2d resource
   idx = create_descriptor(&attach_cmd, sizeof(attach_cmd), VIRTQ_DESC_F_NEXT);
+
   struct ctrl_header hdr2;
   struct virtio_gpu_mem_entry mementries = {.addr = (uint64)&gpu.framebuffer,
                                             .length = 640 * 480 * sizeof(Pixel),
@@ -346,11 +339,11 @@ void gpu_initialize() {
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }
 
-void transfer(int color) {
+void transfer() {
 
-  fill_rects(color);
-  // Define therectangle dimensions
-  // Command to transfer the 2D resource to the host
+  // fill_rects(color);
+  //  Define therectangle dimensions
+  //  Command to transfer the 2D resource to the host
   struct virtio_gpu_transfer_to_host_2d transfer_cmd = {
       .hdr.type = VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D,
       .r = {.x = 0, .y = 0, .width = 640, .height = 480},
@@ -389,5 +382,3 @@ void transfer(int color) {
 
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }
-
-uint64 get_framebuffer() { return &gpu.framebuffer; }

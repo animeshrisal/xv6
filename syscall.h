@@ -1,5 +1,3 @@
-#include "types.h"
-
 #define SYS_uprintf 1
-
-extern uint64 sys_uprintf(void);
+#define SYS_gpuinit 2
+#define SYS_gpu 3

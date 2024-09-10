@@ -1,19 +1,20 @@
 #include "syscall.h"
+#include "display.h"
 #include "tprintf.h"
 #include "types.h"
 
-extern uint64 sys_uprintf(void);
-
-static uint64 (*syscalls[])(void) = {[SYS_uprintf] sys_uprintf};
-
 void syscall(void) {
+
   uint64 syscall;
+  uint64 framebuffer;
+  uint64 framebuffer2;
+  asm volatile("mv %0, a7" : "=r"(syscall) : :);
 
-  asm volatile("mv %0, a7", "=r"(syscall));
-
-  if (syscall < 2) {
-    asm volatile("mv a0, %0" : : "r"(syscalls[syscall]()))
-  } else {
-    tprintf("Invalid syscall")
+  switch (syscall) {
+  case SYS_gpuinit:
+    framebuffer = get_framebuffer();
+    tprintf("Current address!");
+    tprinthex(framebuffer);
+    asm volatile("mv a1, %0" : : "r"(framebuffer));
   }
-};
+}

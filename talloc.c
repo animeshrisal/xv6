@@ -70,7 +70,7 @@ void *talloc(void) {
   }
 
   if (r) {
-    tmemset((uint8 *)r, 5, PGSIZE);
+    tmemset((uint8 *)r, 0, PGSIZE);
   }
 
   return (void *)r;

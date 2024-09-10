@@ -1,5 +1,9 @@
 #include "user_pong.h"
 #include "display.h"
+#include "tprintf.h"
+#include "types.h"
+/*
+#include "display.h"
 
 Pixel *fb;
 
@@ -22,14 +26,14 @@ void fill_rect(Pixel *fb, uint32 x, uint32 y, uint32 width, uint32 height,
   }
 }
 
-void fill_rects(int color) {
+void fill_rects(Pixel *fb, int color) {
 
   for (int i = 0; i < 640 * 480; i++) {
     Pixel white = {.R = (color + i) % 255,
                    .G = (254 - color + i) % 255,
                    .B = color,
                    .A = color};
-    gpu.framebuffer[i] = white;
+    fb[i] = white;
   }
 }
 
@@ -46,10 +50,26 @@ struct ball {
 };
 
 void update() {}
+*/
 
-int user_pong_process() {
-  while (1) {
+void fill_rects(Pixel *framebuffer) {
+  int color = 255;
+  Pixel white = {.R = color, .G = color, .B = color, .A = color};
+
+  for (int i = 0; i < 640 * 480; i++) {
+    framebuffer[i] = white;
   }
+}
+int user_init() {
+  Pixel *framebuffer;
+  gpuinit();
+  asm volatile("mv %0, a1" : "=r"(framebuffer) : :);
 
+  tprintf("\nAddress in memory space\n");
+
+  while (1) {
+    fill_rects(framebuffer);
+    transfer();
+  }
   return 0;
 }

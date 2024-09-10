@@ -1,8 +1,10 @@
 #include "trap.h"
 #include "display.h"
 #include "hardware.h"
+#include "kerneldefs.h"
 #include "plic.h"
 #include "riscv.h"
+#include "syscall.h"
 #include "tprintf.h"
 #include "types.h"
 #include "uart.h"
@@ -11,6 +13,8 @@ uint64 ticks = 0;
 uint64 current_pid;
 
 void usertrap() {}
+
+void usertrapreturn() {}
 
 /*
 void context_switch() {
@@ -48,7 +52,7 @@ int dev_intr() {
   uint64 mcause = r_mcause();
 
   if (mcause == 0x800000000000000BL) {
-    // asm volatile("mv %0, a0" : "=r"() : :);
+
     int irq = plic_claim();
     if (irq == UART0_IRQ) {
       uart_intr();
@@ -64,10 +68,15 @@ int dev_intr() {
 
     return 1;
   } else if ((mcause & ~(1ull << 63)) == 7) {
-    tprintf("WRYYYYY!");
     clock_intr();
     return 2;
-  } else {
+  } else if ((mcause & ~(1ull << 63)) == 8) {
+    syscall();
+    return 3;
+  }
+
+  else {
+
     return 0;
   }
 }

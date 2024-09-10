@@ -24,6 +24,10 @@ void kernel_trap() {
      * */
   }
 
+  //
+  if (cause == 3) {
+    mepc += 4;
+  }
   w_mepc(mepc);
   w_mstatus(mstatus);
 }

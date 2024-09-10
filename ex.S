@@ -52,7 +52,7 @@ ex:
         ld s0, 56(sp)
         ld s1, 64(sp)
         // ld a0, 72(sp) // nope, it's the return value...
-        ld a1, 80(sp)
+        // ld a1, 80(sp)
         ld a2, 88(sp)
         ld a3, 96(sp)
         ld a4, 104(sp)
