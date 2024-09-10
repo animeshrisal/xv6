@@ -339,11 +339,17 @@ void gpu_initialize() {
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }
 
+void fill_rects_kernel(int i) {
+  int color = 255;
+  Pixel white = {.R = color, .G = (color + i) % 256, .B = color, .A = color};
+
+  for (int i = 0; i < 640 * 480; i++) {
+    gpu.framebuffer[i] = white;
+  }
+}
+
 void transfer() {
 
-  // fill_rects(color);
-  //  Define therectangle dimensions
-  //  Command to transfer the 2D resource to the host
   struct virtio_gpu_transfer_to_host_2d transfer_cmd = {
       .hdr.type = VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D,
       .r = {.x = 0, .y = 0, .width = 640, .height = 480},

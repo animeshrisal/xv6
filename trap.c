@@ -41,7 +41,6 @@ void clock_intr() {
   int interval = 20000;
   ticks++;
   *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
-  tprintf("Interrupted");
 
   if ((ticks % 10) == 0) {
     // context_switch();

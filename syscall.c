@@ -16,5 +16,9 @@ void syscall(void) {
     tprintf("Current address!");
     tprinthex(framebuffer);
     asm volatile("mv a1, %0" : : "r"(framebuffer));
-  }
+    break;
+  case SYS_flush:
+    transfer();
+    break;
+  };
 }

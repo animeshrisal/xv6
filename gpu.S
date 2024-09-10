@@ -7,8 +7,8 @@ gpuinit:
   ecall
   ret
 
-.global gpu
-gpu:
-  li a7, SYS_gpu 
+.global flush
+flush:
+  li a7, SYS_flush 
   ecall
   ret
