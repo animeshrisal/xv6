@@ -1,9 +1,10 @@
-#include "user_pong.h"
+#include "user_collision.h"
 #include "display.h"
-#include "tprintf.h"
 #include "types.h"
 
-#define NUM_CUBES 40
+__attribute__((aligned(16))) char userstack[4096];
+
+#define NUM_CUBES 20
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
 // Structure for a cube
@@ -132,7 +133,6 @@ int user_init() {
 
     // Render the cubes
     render_cubes(framebuffer);
-
     flush();
   }
   return 0;

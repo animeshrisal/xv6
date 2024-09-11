@@ -45,7 +45,7 @@ typedef struct {
   uint64 t4;
   uint64 t5;
   uint64 t6;
-} riscv_regs;
+} registers;
 
 typedef enum { NONE, READY, RUNNING, BLOCKED, SLEEPING } proc_state;
 
@@ -56,3 +56,6 @@ typedef struct {
   uint64 page_table_base;
   proc_state state;
 } proc;
+
+void proc_init();
+void proc_intr();

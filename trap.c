@@ -1,8 +1,9 @@
 #include "trap.h"
 #include "display.h"
 #include "hardware.h"
-#include "kerneldefs.h"
+#include "kerneldef.h"
 #include "plic.h"
+#include "proc.h"
 #include "riscv.h"
 #include "syscall.h"
 #include "tprintf.h"
@@ -10,32 +11,17 @@
 #include "uart.h"
 
 uint64 ticks = 0;
-uint64 current_pid;
+proc process[MAX_PROCS];
 
 void usertrap() {}
 
 void usertrapreturn() {}
 
-/*
 void context_switch() {
-  pcb[current_pid].state = READY;
-
-  while (1) {
-    current_pid = (current_pid + 1) % MAX_PROCS;
-    if (pcb[current_pid].state == READY) {
-      pcb[current_pid].state == RUNNING;
-      break;
-    }
+  if ((ticks % 10) == 0) {
+    proc_intr();
   }
-
-  w_mscratch(pcb[current_pid].base_address);
-
-  pcb[current_pid].state = RUNNING;
-
-#define SATP_SV39 (8L << 60)
-  __asm__ __volatile__("sfence.vma");
 }
-*/
 
 void clock_intr() {
   int interval = 20000;
@@ -43,7 +29,7 @@ void clock_intr() {
   *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
 
   if ((ticks % 10) == 0) {
-    // context_switch();
+    proc_intr();
   }
 }
 

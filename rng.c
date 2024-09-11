@@ -109,15 +109,4 @@ void virtio_entropy_init() {
   tprintf("rng initialized!\n");
 }
 
-void get_rng() {
-  idx = create_descriptor(, sizeof(resource_flush_cmd), VIRTQ_DESC_F_NEXT);
-  struct ctrl_header hdr5;
-
-  create_descriptor(&hdr5, sizeof(hdr5), 0);
-  gpu.avail->ring[gpu.avail->idx % NUM] =
-      idx; // Add descriptor to the available ring
-
-  gpu.avail->idx += 1;
-
-  *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
-}
+void get_rng() {}

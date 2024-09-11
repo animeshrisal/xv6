@@ -1,5 +1,6 @@
 #include "hardware.h"
 #include "plic.h"
+#include "proc.h"
 #include "riscv.h"
 #include "tprintf.h"
 #include "trap.h"
@@ -27,12 +28,10 @@ void setup(void) {
   // occurs.
   w_mtvec((uint64)ex);
 
-  // disable paging for now
-  w_satp(0);
-
   w_pmpaddr0(0x3fffffffffffffULL);
   w_pmpcfg0(0xf);
 
+  proc_init();
   plic_init();
   clock_intr();
   w_mie(r_mie() | MIE_MEIE);

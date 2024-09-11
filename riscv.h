@@ -103,3 +103,7 @@ static inline uint64 r_time() {
   asm volatile("csrr %0, time" : "=r"(x));
   return x;
 }
+
+static inline void w_mscratch(uint64 x) {
+  asm volatile("csrw mscratch, %0" : : "r"(x));
+}
