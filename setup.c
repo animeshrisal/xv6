@@ -30,8 +30,8 @@ void setup(void) {
 
   w_pmpaddr0(0x3fffffffffffffULL);
   w_pmpcfg0(0xf);
+  w_satp(0);
 
-  proc_init();
   plic_init();
   clock_intr();
   w_mie(r_mie() | MIE_MEIE);

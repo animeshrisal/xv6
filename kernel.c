@@ -3,6 +3,7 @@
 #include "proc.h"
 #include "riscv.h"
 #include "syscall.h"
+#include "tprintf.h"
 #include "trap.h"
 #include "types.h"
 
@@ -23,6 +24,8 @@ void kernel_trap(registers *regs) {
     /*
      * Cause exception to happen
      * */
+
+    tprintf("Error!\n");
   }
 
   // Caused by clock interrupt

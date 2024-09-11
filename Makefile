@@ -33,7 +33,7 @@ user_collision.bin: $(USER_COLLISION_OBJS) $(USERDEPS)
 
 
 run: 
-	qemu-system-riscv64 -machine virt -device virtio-gpu-device -smp 1 -bios none -kernel ./kernel -global virtio-mmio.force-legacy=false -m 512M -device loader,addr=0x80200000,file=user_collision.bin  
+	qemu-system-riscv64 -machine virt -device virtio-gpu-device -smp 1 -bios none -kernel ./kernel -global virtio-mmio.force-legacy=false -m 1024M -device loader,addr=0xA0000000,file=user_collision.bin  
 	
 clean:
 	-@rm -f *.o *.bin kernel user_collision user

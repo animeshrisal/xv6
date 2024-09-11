@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "tprintf.h"
 #include "types.h"
 
 #define PGSIZE 4096
@@ -58,7 +59,11 @@ void freerange(void *pa_start, void *pa_end) {
   }
 }
 
-void tinit() { freerange(end, (void *)PHYSTOP); }
+void tinit() {
+  tprintf("Freein");
+  freerange(end, (void *)PHYSTOP);
+  tprintf("Freein2");
+}
 
 // Allocate 4 kb page of physical memory.
 void *talloc(void) {
