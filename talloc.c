@@ -39,7 +39,7 @@ void tfree(void *pa) {
 
   if (((uint64)pa % PGSIZE) != 0 || (uint8 *)pa < end ||
       (uint64)pa >= PHYSTOP) {
-    // printastring("ERROR");
+    tprintf("ERROR");
     return;
   }
 
@@ -53,17 +53,14 @@ void tfree(void *pa) {
 
 void freerange(void *pa_start, void *pa_end) {
   uint8 *p;
+  int i = 0;
   p = (uint8 *)PGROUNDUP((uint64)pa_start);
   for (; p + PGSIZE <= (uint8 *)pa_end; p += PGSIZE) {
     tfree(p);
   }
 }
 
-void tinit() {
-  tprintf("Freein");
-  freerange(end, (void *)PHYSTOP);
-  tprintf("Freein2");
-}
+void tinit() { freerange(end, (void *)PHYSTOP); }
 
 // Allocate 4 kb page of physical memory.
 void *talloc(void) {

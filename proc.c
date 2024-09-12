@@ -12,6 +12,8 @@ uint64 initialize_page_table(int proc) {
     if (i == 0) {
       page_table[proc][i] =
           ((uint64)&page_table[proc][512]) >> PGSHIFT << PERMSHIFT;
+
+      tprintf("\n");
       page_table[proc][i] |= (1 << PERM_V);
     } else {
       page_table[proc][i] = 0;
@@ -39,12 +41,15 @@ void proc_init() {
     processes[i].page_table_base = initialize_page_table(i);
     processes[i].state = NONE;
   }
-  tprintf("Lol got here!!");
+  tprintf("WRTTT!");
+  w_satp(MAKE_SATP(processes[0].page_table_base));
+  tprintf("REEEE!");
+  __asm__ volatile("sfence.vma zero, zero");
 
-  tprintf("Lol got here!! 2");
+  current_pid = 0;
+  processes[0].state = RUNNING;
 
-  asm volatile("sfence.vma zero, zero");
-  tprintf("Lol got here!! 3");
+  w_mscratch(processes[current_pid].base_address);
 }
 
 void proc_intr() {

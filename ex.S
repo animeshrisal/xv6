@@ -3,18 +3,12 @@
 .globl exception
 .align 4
 ex:
-	csrrw a0, mscratch, a0
-
-        // make room to save registers.
+	      csrrw a0, mscratch, a0
         addi sp, sp, -256
-	add sp, sp, a0
+	      add sp, sp, a0
 
-	csrrw a0, mscratch, a0
+	      csrrw a0, mscratch, a0
 
-	// that doesn't work!
-	// addi sp, sp, 0x80200000
-
-        // save the registers.
         sd ra, 0(sp)
         sd sp, 8(sp)
         sd gp, 16(sp)
@@ -49,12 +43,9 @@ ex:
 
 	mv a0, sp
 
-        // call the C trap handler in trap.c
+
         call kernel_trap
 
-        // a0 contains the value of SP
-
-        // restore registers.
         ld ra, 0(a0)
         ld sp, 8(a0)
         ld gp, 16(a0)

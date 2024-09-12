@@ -3,3 +3,4 @@
 
 void tprintf(const char *fmt);
 void tprinthex(uint64 hex);
+void tprintint(int i);

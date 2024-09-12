@@ -19,6 +19,7 @@ void usertrapreturn() {}
 
 void context_switch() {
   if ((ticks % 10) == 0) {
+    tprintf("AAAA!");
     proc_intr();
   }
 }

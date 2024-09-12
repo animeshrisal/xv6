@@ -8,7 +8,9 @@ char uart_buf[UART_BUF_SIZE];
 uint64 uart_buf_w;
 uint64 uart_buf_r;
 
-void uart_init() { uart0->IER = 0x1; };
+void uart_init() { uart0->IER = 0x0; };
+
+void uart_interrupt_enable() { uart0->IER = 0x1; };
 
 void uart_intr(void) {
   while (1) {
