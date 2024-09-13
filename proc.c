@@ -13,7 +13,6 @@ uint64 initialize_page_table(int proc) {
       page_table[proc][i] =
           ((uint64)&page_table[proc][512]) >> PGSHIFT << PERMSHIFT;
 
-      tprintf("\n");
       page_table[proc][i] |= (1 << PERM_V);
     } else {
       page_table[proc][i] = 0;
@@ -22,7 +21,7 @@ uint64 initialize_page_table(int proc) {
     for (int i = 512; i < 1024; i++) {
       if (i == 512) {
         page_table[proc][i] =
-            (0xA0000000ULL + (proc + 1) * 0x200000ULL) >> PGSHIFT << PERMSHIFT;
+            (0xA0000000ULL + proc * 0x200000ULL) >> PGSHIFT << PERMSHIFT;
         page_table[proc][i] |= 0x7f;
       } else
         page_table[proc][i] = 0;
@@ -41,27 +40,17 @@ void proc_init() {
     processes[i].page_table_base = initialize_page_table(i);
     processes[i].state = NONE;
   }
-  tprintf("WRTTT!");
+
   w_satp(MAKE_SATP(processes[0].page_table_base));
-  tprintf("REEEE!");
-  __asm__ volatile("sfence.vma zero, zero");
+
+  asm volatile("sfence.vma zero, zero");
 
   current_pid = 0;
   processes[0].state = RUNNING;
-
-  w_mscratch(processes[current_pid].base_address);
+  w_mscratch(processes[0].base_address);
 }
 
 void proc_intr() {
-  processes[current_pid].state = READY;
-
-  while (1) {
-    proc current_process = processes[(++current_pid) % MAX_PROCS];
-    if (current_process.state == READY) {
-      current_process.state = RUNNING;
-      break;
-    }
-  }
-
+  processes[current_pid].state = RUNNING;
   w_mscratch(processes[current_pid].base_address);
 }

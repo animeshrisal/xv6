@@ -9,6 +9,7 @@
 #include "tprintf.h"
 #include "types.h"
 #include "uart.h"
+#include <time.h>
 
 uint64 ticks = 0;
 proc process[MAX_PROCS];
@@ -19,7 +20,6 @@ void usertrapreturn() {}
 
 void context_switch() {
   if ((ticks % 10) == 0) {
-    tprintf("AAAA!");
     proc_intr();
   }
 }
@@ -34,6 +34,15 @@ void clock_intr() {
   }
 }
 
+void clock_init() {
+  clock_intr();
+  // enable machine-mode interrupts.
+  w_mstatus(r_mstatus() | MSTATUS_MIE);
+
+  // enable machine-mode timer interrupts.
+  w_mie(r_mie() | MIE_MTIE);
+}
+
 int dev_intr() {
   uint64 mcause = r_mcause();
 
@@ -44,6 +53,7 @@ int dev_intr() {
       uart_intr();
     } else if (irq == 8) {
       virtio_gpu_intr();
+
     } else {
       tprintf("Wrong interrupt");
     }
@@ -62,7 +72,6 @@ int dev_intr() {
   }
 
   else {
-
     return 0;
   }
 }

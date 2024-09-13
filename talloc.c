@@ -4,7 +4,7 @@
 
 #define PGSIZE 4096
 #define KERNBASE 0x80000000L
-#define PHYSTOP (KERNBASE + 512 * 1024 * 1024)
+#define PHYSTOP (KERNBASE + 256 * 1024 * 1024)
 #define PGROUNDUP(sz) (((sz) + PGSIZE - 1) & ~(PGSIZE - 1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE - 1))
 

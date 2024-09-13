@@ -1,6 +1,7 @@
 #include "plic.h"
 #include "hardware.h"
 #include "riscv.h"
+#include "tprintf.h"
 #include "types.h"
 #include "virtio.h"
 

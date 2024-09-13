@@ -13,7 +13,7 @@ void syscall(void) {
   switch (syscall) {
   case SYS_gpuinit:
     framebuffer = get_framebuffer();
-    tprintf("Current address!");
+
     tprinthex(framebuffer);
     asm volatile("mv a1, %0" : : "r"(framebuffer));
     break;

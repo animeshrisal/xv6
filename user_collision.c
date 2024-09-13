@@ -2,7 +2,7 @@
 #include "display.h"
 #include "types.h"
 
-__attribute__((aligned(16))) char userstack[4096];
+__attribute__((aligned(16))) uint8 userstack[4096];
 
 #define NUM_CUBES 20
 #define SCREEN_WIDTH 640

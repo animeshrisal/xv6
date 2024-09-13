@@ -7,7 +7,7 @@ SECTIONS
    * ensure that entry.S / _entry is at virtual address 0,
    * where qemu's -kernel jumps.
    */
-  . = 0x0;
+  . = 0x00000000;
 
   .text : {
     *(.text .text.*)
