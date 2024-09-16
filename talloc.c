@@ -1,9 +1,10 @@
 #include "kernel.h"
+#include "tprintf.h"
 #include "types.h"
 
 #define PGSIZE 4096
 #define KERNBASE 0x80000000L
-#define PHYSTOP (KERNBASE + 512 * 1024 * 1024)
+#define PHYSTOP (KERNBASE + 256 * 1024 * 1024)
 #define PGROUNDUP(sz) (((sz) + PGSIZE - 1) & ~(PGSIZE - 1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE - 1))
 
@@ -38,7 +39,7 @@ void tfree(void *pa) {
 
   if (((uint64)pa % PGSIZE) != 0 || (uint8 *)pa < end ||
       (uint64)pa >= PHYSTOP) {
-    // printastring("ERROR");
+    tprintf("ERROR");
     return;
   }
 
@@ -52,6 +53,7 @@ void tfree(void *pa) {
 
 void freerange(void *pa_start, void *pa_end) {
   uint8 *p;
+  int i = 0;
   p = (uint8 *)PGROUNDUP((uint64)pa_start);
   for (; p + PGSIZE <= (uint8 *)pa_end; p += PGSIZE) {
     tfree(p);
@@ -70,7 +72,7 @@ void *talloc(void) {
   }
 
   if (r) {
-    tmemset((uint8 *)r, 5, PGSIZE);
+    tmemset((uint8 *)r, 0, PGSIZE);
   }
 
   return (void *)r;

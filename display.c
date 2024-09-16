@@ -1,5 +1,4 @@
 #include "display.h"
-#include "kernel.h"
 #include "talloc.h"
 #include "tprintf.h"
 #include "types.h"
@@ -7,26 +6,21 @@
 
 #define NUM 128
 
-void *memset(void *dst, int c, uint16 n) {
-  char *cdst = (char *)dst;
-  int i;
-  for (i = 0; i < n; i++) {
-    cdst[i] = c;
-  }
-  return dst;
-}
+extern uint64 process_id;
 
 static struct gpu {
-  struct virtq_desc *desc;
-  struct virtq_avail *avail;
-  struct virtq_used *used;
+  struct virtq_desc desc[128] __attribute__((aligned(4096)));
+  struct virtq_avail avail[128] __attribute__((aligned(4096)));
+  struct virtq_used used[1024] __attribute__((aligned(4096)));
 
   char free[NUM];
   uint16 used_idx;
   Pixel framebuffer[640 * 480];
   uint32 width;
   uint32 height;
-} gpu;
+} __attribute__((aligned(4096))) gpu;
+
+uint64 get_framebuffer() { return (uint64)gpu.framebuffer; }
 
 void create_2d_resource(int virtio_gpu_fd) {
   struct virtio_gpu_resource_create_2d create_2d_cmd = {
@@ -123,22 +117,10 @@ void virtio_gpu_init() {
     tprintf("virtio disk has no queue 0");
   if (max < NUM)
     tprintf("virtio disk max queue too short");
-  tprintf("Allocating memory!\n");
-  gpu.desc = talloc();
-  gpu.avail = talloc();
-  gpu.used = talloc();
+
   gpu.width = 640;
   gpu.height = 480;
 
-  if (!gpu.desc || !gpu.avail || !gpu.used) {
-    tprintf("Could not allocate memory\n");
-    return;
-  }
-
-  tmemset(gpu.desc, 0, 4096);
-  tmemset(gpu.avail, 0, 4096);
-  tmemset(gpu.desc, 0, 4096);
-  //  set queue size.
   *R(VIRTIO_MMIO_QUEUE_NUM) = NUM;
 
   *R(VIRTIO_MMIO_QUEUE_DESC_LOW) = (uint64)gpu.desc;
@@ -190,20 +172,16 @@ static void free_chain(int i) {
 }
 
 void virtio_gpu_intr() {
+
   uint32 status = *R(VIRTIO_MMIO_INTERRUPT_STATUS);
   *R(VIRTIO_MMIO_INTERRUPT_ACK) = status & 0x3;
-  tprintf("GPU Interrupted\n");
 
   while (gpu.used_idx != gpu.used->idx) {
-
     int id = gpu.used->ring[gpu.used_idx % NUM].id;
-    tprintf("Processing!");
     // struct virtq_desc desc = gpu.desc[id];
     free_chain(id);
     gpu.used_idx = gpu.used_idx + 1;
   }
-
-  tprintf("Processed!");
 }
 
 static int alloc_desc() {
@@ -235,18 +213,16 @@ static int create_descriptor(void *cmd, int size, uint16 flags) {
   return idx;
 }
 
-void gpu_transfer() {}
+void fill_rects_kernel(int i) {
+  int color = 255;
+  Pixel white = {.R = color, .G = (color + i) % 256, .B = color, .A = color};
 
-void fill_rects(int color) {
-  Pixel white = {.R = color, .G = color, .B = color, .A = color};
-
-  for (int i = 0; i < gpu.width * gpu.height; i++) {
+  for (int i = 0; i < 640 * 480; i++) {
     gpu.framebuffer[i] = white;
   }
 }
 
 void gpu_initialize() {
-  fill_rects(255);
   struct virtio_gpu_rect rect = {.x = 0, .y = 0, .width = 640, .height = 480};
 
   // Command to create a 2D resource
@@ -299,6 +275,7 @@ void gpu_initialize() {
   // Create descriptors for each command and add them to the ring
   // create 2d resource
   idx = create_descriptor(&attach_cmd, sizeof(attach_cmd), VIRTQ_DESC_F_NEXT);
+
   struct ctrl_header hdr2;
   struct virtio_gpu_mem_entry mementries = {.addr = (uint64)&gpu.framebuffer,
                                             .length = 640 * 480 * sizeof(Pixel),
@@ -343,15 +320,15 @@ void gpu_initialize() {
       idx; // Add descriptor to the available ring
 
   gpu.avail->idx += 1;
+  fill_rects_kernel(255);
+}
 
+void virtio_gpu_queue_start() {
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }
 
-void transfer(int color) {
+void transfer() {
 
-  fill_rects(color);
-  // Define therectangle dimensions
-  // Command to transfer the 2D resource to the host
   struct virtio_gpu_transfer_to_host_2d transfer_cmd = {
       .hdr.type = VIRTIO_GPU_CMD_TRANSFER_TO_HOST_2D,
       .r = {.x = 0, .y = 0, .width = 640, .height = 480},

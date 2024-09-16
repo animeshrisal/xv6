@@ -3,6 +3,7 @@
 void uart_intr(void);
 void uart_start();
 int uart_getc(void);
+void uart_interrupt_enable();
 
 void console_intr(int c);
 void uart_init(void);

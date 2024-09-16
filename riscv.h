@@ -95,11 +95,21 @@ static inline uint64 r_mcause() {
 }
 
 static inline void w_mtimecmp(uint64 x) {
-  asm volatile("csrw stimecmp, %0" : : "r"(x));
+  asm volatile("csrw mtimecmp, %0" : : "r"(x));
 }
 
 static inline uint64 r_time() {
   uint64 x;
   asm volatile("csrr %0, time" : "=r"(x));
+  return x;
+}
+
+static inline void w_mscratch(uint64 x) {
+  asm volatile("csrw mscratch, %0" : : "r"(x));
+}
+
+static inline uint64 r_mtval() {
+  uint64 x;
+  asm volatile("csrr %0, mtval" : "=r"(x));
   return x;
 }

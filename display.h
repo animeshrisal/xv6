@@ -148,11 +148,10 @@ struct virtio_gpu_update_cursor {
 };
 
 void virtq_init();
-void virtio_gpu_init();
 void virtio_gpu_intr();
 void virtio_gpu_draw_rectangle();
 static void gpu_initialize();
-void transfer(int color);
+void transfer();
 
 typedef struct Pixel {
   uint8 R;
@@ -160,4 +159,8 @@ typedef struct Pixel {
   uint8 B;
   uint8 A;
 } Pixel;
+
+void virtio_gpu_init();
+uint64 get_framebuffer();
+void virtio_gpu_queue_start();
 #endif
