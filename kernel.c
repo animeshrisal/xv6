@@ -9,8 +9,6 @@ extern uint64 pt[8][512 * 3];
 extern uint64 current_pid;
 extern proc processes[MAX_PROCS];
 
-__attribute__((aligned(16))) uint8 stack0[4096];
-
 uint64 virt2phys(uint64 addr) {
   return processes[current_pid].base_address + addr;
 }

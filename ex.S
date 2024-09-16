@@ -49,7 +49,7 @@ ex:
         ld ra, 0(a0)
         ld sp, 8(a0)
         ld gp, 16(a0)
-        ld tp, 24(a0)
+        // ld tp, 24(a0) in case we change cpus
         ld t0, 32(a0)
         ld t1, 40(a0)
         ld t2, 48(a0)

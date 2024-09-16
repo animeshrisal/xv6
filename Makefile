@@ -56,7 +56,7 @@ user_print.bin: $(USER_PRINT_OBJS) $(USERDEPS)
 
 
 run: user_collision.bin user_rng.bin user_print.bin kernel 
-	qemu-system-riscv64 -machine virt -device virtio-gpu-device -smp 1 -bios none -kernel ./kernel -global virtio-mmio.force-legacy=false -device loader,addr=0x80200000,file=user_collision.bin  -device loader,addr=0x80400000,file=user_rng.bin  -device loader,addr=0x80600000,file=user_print.bin  
+	qemu-system-riscv64 -machine virt -device virtio-gpu-device -smp 2 -bios none -kernel ./kernel -global virtio-mmio.force-legacy=false -device loader,addr=0x81000000,file=user_collision.bin  -device loader,addr=0x82000000,file=user_rng.bin  -device loader,addr=0x82200000,file=user_print.bin  
 
 	
 clean:

@@ -26,17 +26,17 @@ struct uart {
 #define CLINT 0x2000000L
 #define CLINT_MTIMECMP(hartid) (CLINT + 0x4000 + 8 * (hartid))
 #define CLINT_MTIME (CLINT + 0xBFF8) // cycles since boot
-
+#define CLINT_MSIP(hartid) (CLINT + 0x0 + (hartid) * 4)
 // platform level interrupt controller (PLIC)
+
 #define PLIC 0x0c000000L
 #define PLIC_PRIORITY (PLIC + 0x0)
 #define PLIC_PENDING (PLIC + 0x1000)
-#define PLIC_MENABLE (PLIC + 0x2000)
-#define PLIC_SENABLE (PLIC + 0x2080)
-#define PLIC_MPRIORITY (PLIC + 0x200000)
-#define PLIC_SPRIORITY (PLIC + 0x201000)
-#define PLIC_MCLAIM (PLIC + 0x200004)
-#define PLIC_SCLAIM (PLIC + 0x201004)
+
+// Update the machine-level definitions to include `hart`
+#define PLIC_MENABLE(hart) (PLIC + 0x2000 + (hart) * 0x100)
+#define PLIC_MPRIORITY(hart) (PLIC + 0x200000 + (hart) * 0x2000)
+#define PLIC_MCLAIM(hart) (PLIC + 0x200004 + (hart) * 0x2000)
 
 #define UART0_IRQ 10
 #define VIRTIO_IRQ 1

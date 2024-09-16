@@ -16,9 +16,11 @@ void usertrap() {}
 void usertrapreturn() {}
 
 void clock_intr() {
+
+  int core_id = cpuid();
   int interval = 20000;
   ticks++;
-  *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
+  *(uint64 *)CLINT_MTIMECMP(core_id) = *(uint64 *)CLINT_MTIME + interval;
 
   if ((ticks % 10) == 0) {
     proc_intr();

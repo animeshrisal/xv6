@@ -1,13 +1,22 @@
-#include "proc.h"
+#include "kerneldef.h"
 #include "riscv.h"
 #include "tprintf.h"
 
 uint64 current_pid = 0;
-proc processes[MAX_PROCS];
+proc cpu1_processes[1];
+proc cpu2_processes[2];
 
-__attribute__((aligned(4096))) uint64 page_table[NPROC][512 * 3];
+__attribute__((aligned(4096))) uint64 cpu1_page_table[1][512 * 3];
+__attribute__((aligned(4096))) uint64 cpu2_page_table[2][512 * 3];
 
-uint64 initialize_page_table(int proc) {
+int cpuid() {
+  int id = r_tp();
+  return id;
+}
+uint64 initialize_page_table(int hartid, int proc) {
+  uint64(*page_table)[512 * 3] =
+      (hartid == 0) ? cpu1_page_table : cpu2_page_table;
+
   for (int i = 0; i < 512; i++) {
     if (i == 0) {
       page_table[proc][i] =
@@ -32,12 +41,17 @@ uint64 initialize_page_table(int proc) {
 }
 
 void proc_init() {
+  int hartid = cpuid();
+  proc *processes = (hartid == 0) ? cpu1_processes : cpu2_processes;
 
-  for (int i = 0; i < NPROC; i++) {
+  int num_processes = (hartid == 0) ? 1 : 2;
+  int addr = 0x80000000ULL + hartid * 0x01000000;
+
+  for (int i = 0; i < num_processes; i++) {
     processes[i].pc = 0;
     processes[i].sp = 0x1ffff8 - 256;
-    processes[i].base_address = 0x80200000ULL + 0x200000 * i;
-    processes[i].page_table_base = initialize_page_table(i);
+    processes[i].base_address = addr + 0x200000 * i;
+    processes[i].page_table_base = initialize_page_table(hartid, i);
     processes[i].state = NONE;
   }
 
@@ -52,6 +66,8 @@ void proc_init() {
 }
 
 void proc_intr() {
+  int hartid = cpuid();
+  proc *processes = (hartid == 0) ? cpu1_processes : cpu2_processes;
 
   while (1) {
     current_pid = (current_pid + 1) % MAX_PROCS;

@@ -1,4 +1,5 @@
 #include "display.h"
+#include "kerneldef.h"
 #include "plic.h"
 #include "riscv.h"
 #include "talloc.h"
@@ -7,10 +8,36 @@
 #include "types.h"
 #include "uart.h"
 
+// need a value thats shared between all cores
+volatile static int initialized = 0;
+
+#define NCPU 2
+
 extern int main(void);
 extern void ex(void);
 extern void printstring(char *);
 extern void printhex(uint64);
+
+void setup_cores() {
+  if (cpuid() == 0) {
+    uart_init();
+    tprintf("Starting xv6! \n");
+    proc_init();
+    virtio_gpu_init();
+    virtio_gpu_queue_start();
+    virtio_gpu_intr();
+
+    initialized = 1;
+  } else {
+    while (initialized == 0)
+      ;
+    w_mtvec((uint64)ex);
+    plic_init();
+    clock_init();
+  };
+}
+
+__attribute__((aligned(16))) char stack0[4096 * NCPU];
 
 void setup(void) {
   // set M Previous Privilege mode to User so mret returns to user mode.
@@ -27,22 +54,15 @@ void setup(void) {
   w_mie(r_mie() | MIE_MSIE);
   // set the machine-mode trap handler to jump to function "ex" when a trap
   // occurs.
-  w_mtvec((uint64)ex);
+
   w_pmpaddr0(0x3fffffffffffffULL);
   w_pmpcfg0(0xf);
 
-  uart_init();
-  tprintf("Starting xv6! \n");
-  proc_init();
-  virtio_gpu_init();
-  virtio_gpu_queue_start();
-  virtio_gpu_intr();
+  int core_id = r_mhartid();
+  w_tp(core_id);
 
-  plic_init();
-  clock_init();
-
+  setup_cores();
   w_mepc((uint64)0);
-  tprintf("WRRRRRYYYYY!");
   //  return to previous mode
   asm volatile("mret");
 }

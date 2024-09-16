@@ -4,14 +4,14 @@
 #include "types.h"
 #include "virtio.h"
 
-#define NUM 128
+#define NUM 1024
 
 extern uint64 process_id;
 
 static struct gpu {
-  struct virtq_desc desc[128] __attribute__((aligned(4096)));
-  struct virtq_avail avail[128] __attribute__((aligned(4096)));
-  struct virtq_used used[1024] __attribute__((aligned(4096)));
+  struct virtq_desc desc[NUM] __attribute__((aligned(4096)));
+  struct virtq_avail avail[NUM] __attribute__((aligned(4096)));
+  struct virtq_used used[NUM] __attribute__((aligned(4096)));
 
   char free[NUM];
   uint16 used_idx;
