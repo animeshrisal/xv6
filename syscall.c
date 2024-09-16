@@ -1,24 +1,31 @@
 #include "syscall.h"
 #include "display.h"
+#include "gpu_driver.h"
+#include "kerneldef.h"
 #include "tprintf.h"
 #include "types.h"
 
-void syscall(void) {
-
-  uint64 syscall;
+void syscall(registers *regs) {
+  uint64 syscall = regs->a7;
   uint64 framebuffer;
-  uint64 framebuffer2;
-  asm volatile("mv %0, a7" : "=r"(syscall) : :);
 
   switch (syscall) {
   case SYS_gpuinit:
-    framebuffer = get_framebuffer();
-
-    tprinthex(framebuffer);
-    asm volatile("mv a1, %0" : : "r"(framebuffer));
+    transfer();
     break;
   case SYS_flush:
     transfer();
     break;
+
+  case SYS_uprintf:
+    tprintf((char *)virt2phys(regs->a0));
+    break;
+
+  case SYS_uprinthex:
+    tprinthex(virt2phys(regs->a0));
+
+  case SYS_make_rect:
+  case SYS_clear_frame:
+    gpu_command(syscall, regs);
   };
 }

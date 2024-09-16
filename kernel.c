@@ -1,8 +1,4 @@
-#include "display.h"
-#include "hardware.h"
-#include "proc.h"
 #include "riscv.h"
-#include "syscall.h"
 #include "tprintf.h"
 #include "trap.h"
 #include "types.h"
@@ -28,25 +24,16 @@ uint64 kernel_trap(registers *regs) {
   uint64 mstatus = r_mstatus();
   uint64 mcause = r_mcause();
   uint64 mtval = r_mtval();
-  int cause = dev_intr();
 
   processes[current_pid].pc = mepc;
   processes[current_pid].sp = phys2virt((uint64)regs);
   processes[current_pid].state = READY;
-  tprinthex(mcause);
+
+  int cause = dev_intr(regs);
+
+  // putting this makes the display run fast. i have no idea why
+  tprintf(".");
   if (cause == 0) {
-
-    tprintf("Error!");
-    /*
-     * Cause exception to happen
-     * */
-
-    tprinthex(mcause);
-    tprintf("\n");
-    tprinthex(mtval);
-    tprintf("\n");
-    tprinthex(mepc);
-    tprintf("\n");
   }
 
   // Caused by clock interrupt
@@ -55,17 +42,12 @@ uint64 kernel_trap(registers *regs) {
 
   // Caused by an ecall
   if (cause == 3) {
-
     w_mepc(processes[current_pid].pc + 4);
   } else {
     w_mepc(processes[current_pid].pc);
   }
 
-  w_mscratch(processes[current_pid].base_address);
-
   regs = (registers *)virt2phys(processes[current_pid].sp);
-
-  regs->a0 = 0;
   regs->sp = (uint64)regs;
 
   return (uint64)regs;

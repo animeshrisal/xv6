@@ -6,7 +6,7 @@ _entry:
   li a0, 4096
   add sp, sp, a0
 
-  jal user_init
+  jal main
 
 loop:
   j loop

@@ -162,4 +162,5 @@ typedef struct Pixel {
 
 void virtio_gpu_init();
 uint64 get_framebuffer();
+void virtio_gpu_queue_start();
 #endif

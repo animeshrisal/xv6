@@ -1,7 +1,5 @@
 #include "display.h"
-#include "hardware.h"
 #include "plic.h"
-#include "proc.h"
 #include "riscv.h"
 #include "talloc.h"
 #include "tprintf.h"
@@ -34,16 +32,17 @@ void setup(void) {
   w_pmpcfg0(0xf);
 
   uart_init();
-
   tprintf("Starting xv6! \n");
-
-  tinit();
+  proc_init();
   virtio_gpu_init();
+  virtio_gpu_queue_start();
+  virtio_gpu_intr();
+
   plic_init();
   clock_init();
 
-  proc_init();
-  uart_interrupt_enable();
   w_mepc((uint64)0);
+  tprintf("WRRRRRYYYYY!");
+  //  return to previous mode
   asm volatile("mret");
 }

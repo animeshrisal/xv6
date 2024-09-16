@@ -1,6 +1,6 @@
 #include "types.h"
 
-#define MAX_PROCS 8
+#define MAX_PROCS 3
 #define SATP_SV39 (8L << 60)
 #define MAKE_SATP(pagetable) (SATP_SV39 | (((uint64)pagetable) >> 12))
 

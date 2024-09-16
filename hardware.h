@@ -1,3 +1,6 @@
+#ifndef HARDWARE_H
+#define HARDWARE_H
+
 #include "types.h"
 
 struct uart {
@@ -40,3 +43,5 @@ struct uart {
 
 #define MTI 7
 #define MEI 11
+
+#endif

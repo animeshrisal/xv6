@@ -12,10 +12,11 @@ void plic_init(void) {
 
   // set enable bits for this hart's S-mode
   // for the uart and virtio gpu.
-  *(uint32 *)PLIC_MENABLE = (1 << UART0_IRQ) | (1 << 8);
+  *(uint32 *)PLIC_MENABLE = (1 << UART0_IRQ) | (1 << VIRTIO0_IRQ);
 
   // set this hart's S-mode priority threshold to 0.
   *(uint32 *)PLIC_MPRIORITY = 0;
+
   w_mie(r_mie() | MIE_MEIE);
 }
 

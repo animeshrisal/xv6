@@ -3,13 +3,10 @@
 #include "hardware.h"
 #include "kerneldef.h"
 #include "plic.h"
-#include "proc.h"
 #include "riscv.h"
-#include "syscall.h"
 #include "tprintf.h"
 #include "types.h"
 #include "uart.h"
-#include <time.h>
 
 uint64 ticks = 0;
 proc process[MAX_PROCS];
@@ -17,12 +14,6 @@ proc process[MAX_PROCS];
 void usertrap() {}
 
 void usertrapreturn() {}
-
-void context_switch() {
-  if ((ticks % 10) == 0) {
-    proc_intr();
-  }
-}
 
 void clock_intr() {
   int interval = 20000;
@@ -43,7 +34,7 @@ void clock_init() {
   w_mie(r_mie() | MIE_MTIE);
 }
 
-int dev_intr() {
+int dev_intr(registers *regs) {
   uint64 mcause = r_mcause();
 
   if (mcause == 0x800000000000000BL) {
@@ -51,6 +42,7 @@ int dev_intr() {
     int irq = plic_claim();
     if (irq == UART0_IRQ) {
       uart_intr();
+
     } else if (irq == 8) {
       virtio_gpu_intr();
 
@@ -67,7 +59,7 @@ int dev_intr() {
     clock_intr();
     return 2;
   } else if ((mcause & ~(1ull << 63)) == 8) {
-    syscall();
+    syscall(regs);
     return 3;
   }
 
