@@ -2,6 +2,7 @@
 #include "kerneldef.h"
 #include "plic.h"
 #include "riscv.h"
+#include "spinlock.h"
 #include "talloc.h"
 #include "tprintf.h"
 #include "trap.h"
@@ -18,22 +19,31 @@ extern void ex(void);
 extern void printstring(char *);
 extern void printhex(uint64);
 
+void test_spinlock() {}
+
 void setup_cores() {
   if (cpuid() == 0) {
-    uart_init();
-    tprintf("Starting xv6! \n");
-    proc_init();
-    virtio_gpu_init();
-    virtio_gpu_queue_start();
-    virtio_gpu_intr();
 
+    // Use first cpu to initialize stuff
+    uart_init();
+    tprintf_init();
+    tprintf("Setting up first CPU! \n");
+
+    plic_init();
+    plic_hartinit();
     initialized = 1;
+    while (1) {
+      tprintf("REEEEEE!");
+    }
+
   } else {
     while (initialized == 0)
       ;
-    w_mtvec((uint64)ex);
-    plic_init();
-    clock_init();
+    tprintf("Starting up second CPU! \n");
+    while (1) {
+      tprintf("YOOOOOiiiiiiiiiiiiiiiiiiiiiii!");
+    }
+    plic_hartinit();
   };
 }
 
@@ -50,19 +60,21 @@ void setup(void) {
   // enable machine-mode interrupts.
   w_mstatus(r_mstatus() | MSTATUS_MIE);
 
+  w_mtvec((uint64)ex);
   // enable software interrupts (ecall) in M mode.
   w_mie(r_mie() | MIE_MSIE);
   // set the machine-mode trap handler to jump to function "ex" when a trap
   // occurs.
+  w_mepc((uint64)0);
 
   w_pmpaddr0(0x3fffffffffffffULL);
   w_pmpcfg0(0xf);
-
   int core_id = r_mhartid();
   w_tp(core_id);
 
+  proc_init();
   setup_cores();
-  w_mepc((uint64)0);
+
   //  return to previous mode
   asm volatile("mret");
 }

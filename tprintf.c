@@ -1,11 +1,21 @@
+#include "spinlock.h"
 #include "types.h"
 #include "uart.h"
 
+struct spinlock printfspinlock;
+
+void tprintf_init() { initlock(&printfspinlock); };
+
 void tprintf(const char *fmt) {
+
+  acquire(&printfspinlock);
+
   while (*fmt) {
     uartputc_sync(*fmt);
     fmt++;
   }
+
+  release(&printfspinlock);
 }
 
 void tprinthex(uint64 hex) {

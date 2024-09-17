@@ -325,6 +325,7 @@ void gpu_initialize() {
 
 void virtio_gpu_queue_start() {
   *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
+  //
 }
 
 void transfer() {

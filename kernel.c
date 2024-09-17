@@ -1,3 +1,4 @@
+#include "kerneldef.h"
 #include "riscv.h"
 #include "tprintf.h"
 #include "trap.h"
@@ -5,16 +6,16 @@
 
 extern int main(void);
 extern void ex(void);
-extern uint64 pt[8][512 * 3];
 extern uint64 current_pid;
-extern proc processes[MAX_PROCS];
+extern proc cpu1_processes[1];
+extern proc cpu2_processes[1];
 
-uint64 virt2phys(uint64 addr) {
-  return processes[current_pid].base_address + addr;
+uint64 virt2phys(uint64 addr, proc process) {
+  return process.base_address + addr;
 }
 
-uint64 phys2virt(uint64 addr) {
-  return addr - processes[current_pid].base_address;
+uint64 phys2virt(uint64 addr, proc process) {
+  return addr - process.base_address;
 }
 
 uint64 kernel_trap(registers *regs) {
@@ -22,10 +23,15 @@ uint64 kernel_trap(registers *regs) {
   uint64 mstatus = r_mstatus();
   uint64 mcause = r_mcause();
   uint64 mtval = r_mtval();
+  uint64 hartid = cpuid();
 
-  processes[current_pid].pc = mepc;
-  processes[current_pid].sp = phys2virt((uint64)regs);
-  processes[current_pid].state = READY;
+  proc *processes = (hartid == 0) ? cpu1_processes : cpu2_processes;
+
+  int num_processes = (hartid == 0) ? 1 : 2;
+
+  processes[0].pc = mepc;
+  processes[0].sp = virt2phys(processes[0].sp, processes[0]);
+  processes[0].state = READY;
 
   int cause = dev_intr(regs);
 
@@ -40,12 +46,12 @@ uint64 kernel_trap(registers *regs) {
 
   // Caused by an ecall
   if (cause == 3) {
-    w_mepc(processes[current_pid].pc + 4);
+    w_mepc(processes[0].pc + 4);
   } else {
-    w_mepc(processes[current_pid].pc);
+    w_mepc(processes[0].pc);
   }
 
-  regs = (registers *)virt2phys(processes[current_pid].sp);
+  regs = (registers *)virt2phys(processes[0].sp, processes[0]);
   regs->sp = (uint64)regs;
 
   return (uint64)regs;
