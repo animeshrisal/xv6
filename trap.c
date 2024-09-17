@@ -16,7 +16,7 @@ void usertrap() {}
 void usertrapreturn() {}
 
 void clock_intr() {
-  int interval = 20000;
+  int interval = 2000;
   ticks++;
   *(uint64 *)CLINT_MTIMECMP(0) = *(uint64 *)CLINT_MTIME + interval;
 

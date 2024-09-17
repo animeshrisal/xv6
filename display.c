@@ -1,5 +1,4 @@
 #include "display.h"
-#include "talloc.h"
 #include "tprintf.h"
 #include "types.h"
 #include "virtio.h"

@@ -5,8 +5,8 @@ CC=riscv64-unknown-elf-gcc
 CFLAGS=-g -mcmodel=medany -mno-relax -I. -ffreestanding
 OBJCOPY=riscv64-unknown-elf-objcopy
 
-KERNELDEPS = hardware.h riscv.h types.h display.h plic.h proc.h talloc.h tprintf.h trap.h uart.h virtio.h kerneldef.h kernel.h param.h syscall.h gpu_driver.h 
-KERNELOBJS = boot.o kernel.o ex.o setup.o display.o plic.o proc.o syscall.o talloc.o tprintf.o trap.o uart.o gpu_driver.o
+KERNELDEPS = hardware.h riscv.h types.h display.h plic.h proc.h tprintf.h trap.h uart.h virtio.h kerneldef.h kernel.h param.h syscall.h gpu_driver.h 
+KERNELOBJS = boot.o kernel.o ex.o setup.o display.o plic.o proc.o syscall.o tprintf.o trap.o uart.o gpu_driver.o
 USERDEPS = user_collision.h display.h types.h
 USER_COLLISION_OBJS = user.o gpu.o user_collision.o uprintf.o 
 USER_RNG_OBJS = user.o user_rng.o uprintf.o 
