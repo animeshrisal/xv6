@@ -1,3 +1,5 @@
-My goal is to write a simple operating system for the RISC-V architecture.
+Use make to build 
+Use make run to run the program
 
-The end goal is that I can write a simple operating system that can run DOOM.
+Current progress:
+Can display some blocks in the display and runs two cli proceses
