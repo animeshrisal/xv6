@@ -87,6 +87,8 @@ int main(void) {
   int i = 0;
   int j = 0;
 
+  gpuinit();
+
   initialize_cubes();
   while (1) {
     clear_frame();

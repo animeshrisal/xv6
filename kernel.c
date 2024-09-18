@@ -19,6 +19,7 @@ uint64 phys2virt(uint64 addr, proc process) {
 }
 
 uint64 kernel_trap(registers *regs) {
+
   uint64 mepc = r_mepc();
   uint64 mstatus = r_mstatus();
   uint64 mcause = r_mcause();

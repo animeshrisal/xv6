@@ -45,8 +45,7 @@ void proc_init() {
 
   proc *processes = (hartid == 0) ? cpu1_processes : cpu2_processes;
 
-  int num_processes = (hartid == 0) ? 1 : 2;
-  int addr = 0x80000000ULL + (hartid + 1) * 0x01000000;
+  uint64 addr = 0x80000000ULL + (hartid + 1) * 0x01000000;
 
   processes[0].pc = 0;
   processes[0].sp = 0x1ffff8 - 256;
@@ -60,6 +59,7 @@ void proc_init() {
 
   processes[0].state = RUNNING;
 
+  tprinthex(processes[0].base_address);
   w_mscratch(processes[0].base_address);
 }
 

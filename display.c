@@ -323,11 +323,6 @@ void gpu_initialize() {
   fill_rects_kernel(255);
 }
 
-void virtio_gpu_queue_start() {
-  *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
-  //
-}
-
 void transfer() {
 
   struct virtio_gpu_transfer_to_host_2d transfer_cmd = {

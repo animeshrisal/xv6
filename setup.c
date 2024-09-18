@@ -28,21 +28,17 @@ void setup_cores() {
     uart_init();
     tprintf_init();
     tprintf("Setting up first CPU! \n");
-
     plic_init();
+
     plic_hartinit();
     initialized = 1;
-    while (1) {
-      tprintf("REEEEEE!");
-    }
+
+    virtio_gpu_init();
 
   } else {
     while (initialized == 0)
       ;
-    tprintf("Starting up second CPU! \n");
-    while (1) {
-      tprintf("YOOOOOiiiiiiiiiiiiiiiiiiiiiii!");
-    }
+    tprintf("Setting up second CPU! \n");
     plic_hartinit();
   };
 }

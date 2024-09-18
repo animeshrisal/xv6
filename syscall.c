@@ -11,7 +11,7 @@ void syscall(registers *regs) {
 
   switch (syscall) {
   case SYS_gpuinit:
-    transfer();
+    gpu_initialize();
     break;
   case SYS_flush:
     transfer();
