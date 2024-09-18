@@ -15,7 +15,7 @@ void plic_init(void) {
 }
 
 void plic_hartinit(void) {
-  int hart = cpuid();
+  uint64 hart = cpuid();
   // set enable bits for this hart's S-mode
   // for the uart and virtio disk.
   *(uint32 *)PLIC_MENABLE(hart) = (1 << UART0_IRQ) | (1 << VIRTIO0_IRQ);

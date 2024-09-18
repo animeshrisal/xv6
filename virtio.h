@@ -30,6 +30,8 @@
 #define VIRTIO_MMIO_CONFIG_GENERATION 0x0FC
 #define VIRTIO_MMIO_CONFIG_BASE 0x100
 // virtio mmio interface
+#define VIRTIO0RNG 0x10004000
+
 #define VIRTIO0 0x10008000
 #define VIRTIO0_IRQ 8
 
@@ -47,6 +49,7 @@
 #define VIRTIO_RING_F_EVENT_IDX 29
 
 #define R(r) ((volatile uint32 *)(VIRTIO0 + (r)))
+#define RNG(r) ((volatile uint32 *)(VIRTIO0RNG + (r)))
 
 #define VIRTIO_QUEUE_SIZE 8
 
@@ -64,7 +67,7 @@ struct virtq_desc {
 struct virtq_avail {
   uint16 flags;
   uint16 idx;
-  uint16 ring[];
+  uint16 ring[256];
 };
 
 struct virtq_used_elem {
@@ -75,7 +78,7 @@ struct virtq_used_elem {
 struct virtq_used {
   uint16 flags;
   uint16 idx;
-  struct virtq_used_elem ring[];
+  struct virtq_used_elem ring[256];
 };
 
 static int virtq_alloc_desc();

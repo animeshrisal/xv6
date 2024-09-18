@@ -7,7 +7,6 @@ struct spinlock printfspinlock;
 void tprintf_init() { initlock(&printfspinlock); };
 
 void tprintf(const char *fmt) {
-
   acquire(&printfspinlock);
 
   while (*fmt) {

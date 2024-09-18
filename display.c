@@ -4,21 +4,22 @@
 #include "types.h"
 #include "virtio.h"
 
-#define NUM 1024
+// virtio
+#define NUM 512
 
 extern uint64 process_id;
 
 static struct gpu {
-  struct virtq_desc desc[NUM] __attribute__((aligned(4096)));
-  struct virtq_avail avail[NUM] __attribute__((aligned(4096)));
-  struct virtq_used used[NUM] __attribute__((aligned(4096)));
+  struct virtq_desc desc[NUM];
+  struct virtq_avail avail[NUM];
+  struct virtq_used used[NUM];
 
   char free[NUM];
   uint16 used_idx;
   Pixel framebuffer[640 * 480];
   uint32 width;
   uint32 height;
-} __attribute__((aligned(4096))) gpu;
+} gpu;
 
 uint64 get_framebuffer() { return (uint64)gpu.framebuffer; }
 
@@ -53,8 +54,6 @@ void transfer_to_host_2d(int virtio_gpu_fd) {
       .padding = 0,
   };
 };
-
-void fill_rect() {}
 
 void virtio_gpu_init() {
   // Create a 2D resource
@@ -146,9 +145,6 @@ void virtio_gpu_init() {
     tprintf("Could not initialize\n");
     return;
   }
-
-  tprintf("GPU initialized!\n");
-  gpu_initialize();
 }
 
 static void free_desc(int i) {
@@ -321,6 +317,8 @@ void gpu_initialize() {
 
   gpu.avail->idx += 1;
   fill_rects_kernel(255);
+
+  *R(VIRTIO_MMIO_QUEUE_NOTIFY) = 0; // value is queue number
 }
 
 void transfer() {

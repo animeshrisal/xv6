@@ -6,6 +6,7 @@ void initlock(struct spinlock *lock) {
 }
 
 void acquire(struct spinlock *lock) {
+  // disable_interrupts();
   while (__sync_lock_test_and_set(&lock->locked, 1) != 0)
     ;
 }
@@ -13,4 +14,6 @@ void acquire(struct spinlock *lock) {
 void release(struct spinlock *lock) {
   lock->cpuid = -1;
   __sync_lock_release(&lock->locked);
+
+  // enable_interrupts();
 }

@@ -80,7 +80,6 @@ void initialize_cubes() {
 }
 
 int main(void) {
-
   ball.x = 0;
   ball.y = 0;
 
@@ -88,8 +87,8 @@ int main(void) {
   int j = 0;
 
   gpuinit();
-
   initialize_cubes();
+
   while (1) {
     clear_frame();
     update_cubes();

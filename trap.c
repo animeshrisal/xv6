@@ -9,11 +9,6 @@
 #include "uart.h"
 
 uint64 ticks = 0;
-proc process[MAX_PROCS];
-
-void usertrap() {}
-
-void usertrapreturn() {}
 
 void clock_intr() {
 

@@ -1,3 +1,4 @@
+#include "cpu.h"
 #include "display.h"
 #include "kerneldef.h"
 #include "plic.h"
@@ -16,30 +17,31 @@ volatile static int initialized = 0;
 
 extern int main(void);
 extern void ex(void);
-extern void printstring(char *);
-extern void printhex(uint64);
-
-void test_spinlock() {}
 
 void setup_cores() {
   if (cpuid() == 0) {
-
+    tprintf("Setting up first CPU! \n");
     // Use first cpu to initialize stuff
+    init_cpu(1, 0x81000000ULL);
+    proc_init();
     uart_init();
     tprintf_init();
-    tprintf("Setting up first CPU! \n");
+
     plic_init();
-
     plic_hartinit();
-    initialized = 1;
-
     virtio_gpu_init();
+
+    initialized = 1;
 
   } else {
     while (initialized == 0)
       ;
     tprintf("Setting up second CPU! \n");
+    init_cpu(2, 0x82000000ULL);
+    proc_init();
+
     plic_hartinit();
+    clock_init();
   };
 }
 
@@ -65,10 +67,9 @@ void setup(void) {
 
   w_pmpaddr0(0x3fffffffffffffULL);
   w_pmpcfg0(0xf);
-  int core_id = r_mhartid();
+  uint64 core_id = r_mhartid();
   w_tp(core_id);
 
-  proc_init();
   setup_cores();
 
   //  return to previous mode

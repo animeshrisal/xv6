@@ -4,6 +4,6 @@
 #include "trap.h"
 
 void syscall(registers *regs);
-int cpuid();
+uint64 cpuid();
 
 #endif
