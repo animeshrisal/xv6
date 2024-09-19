@@ -14,6 +14,7 @@ void init_cpu(int max_processes, uint64 memory_area) {
   cpu->current_process = 0;
   cpu->max_processes = max_processes;
   cpu->memory_area = memory_area;
+  cpu->ticks = 0;
 };
 
 struct cpu *get_cpu() {

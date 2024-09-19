@@ -22,14 +22,16 @@ uint64 kernel_trap(registers *regs) {
   uint64 mstatus = r_mstatus();
   uint64 mcause = r_mcause();
   uint64 mtval = r_mtval();
-  uint64 hartid = cpuid();
 
   struct cpu *cpu = get_cpu();
-  proc *proc = &cpu->processes[cpu->cpu_id];
+  proc *proc = &cpu->processes[cpu->current_process];
 
   proc->pc = mepc;
   proc->sp = phys2virt((uint64)regs, proc);
+  proc->state = READY;
 
+  tprintf(" ");
+  tprintf(" ");
   int cause = dev_intr(regs);
 
   if (cause == 0) {

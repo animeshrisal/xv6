@@ -10,6 +10,7 @@ struct cpu {
   int max_processes;
   int cpu_id;
   uint64 memory_area;
+  uint64 ticks;
 };
 
 struct cpu *get_cpu();

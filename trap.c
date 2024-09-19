@@ -1,4 +1,5 @@
 #include "trap.h"
+#include "cpu.h"
 #include "display.h"
 #include "hardware.h"
 #include "kerneldef.h"
@@ -8,16 +9,21 @@
 #include "types.h"
 #include "uart.h"
 
-uint64 ticks = 0;
-
 void clock_intr() {
 
-  int core_id = cpuid();
-  int interval = 20000;
-  ticks++;
-  *(uint64 *)CLINT_MTIMECMP(core_id) = *(uint64 *)CLINT_MTIME + interval;
+  struct cpu *cpu = get_cpu();
+  int interval = 100000;
 
-  if ((ticks % 10) == 0) {
+  cpu->ticks++;
+
+  if (cpu->cpu_id == 1) {
+    tprintf("The CPU id");
+    tprinthex(cpu->cpu_id);
+    tprintf("\n");
+  }
+
+  *(uint64 *)CLINT_MTIMECMP(cpu->cpu_id) = *(uint64 *)CLINT_MTIME + interval;
+  if ((cpu->ticks % 10) == 0) {
     proc_intr();
   }
 }
@@ -38,6 +44,9 @@ int dev_intr(registers *regs) {
 
     int irq = plic_claim();
     if (irq == UART0_IRQ) {
+      if (cpuid() == 1) {
+        tprintf("interrupt sent by hart 1");
+      }
       uart_intr();
 
     } else if (irq == 8) {

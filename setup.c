@@ -4,7 +4,6 @@
 #include "plic.h"
 #include "riscv.h"
 #include "spinlock.h"
-#include "talloc.h"
 #include "tprintf.h"
 #include "trap.h"
 #include "types.h"
@@ -30,7 +29,7 @@ void setup_cores() {
     plic_init();
     plic_hartinit();
     virtio_gpu_init();
-
+    clock_init();
     initialized = 1;
 
   } else {
@@ -61,6 +60,7 @@ void setup(void) {
   w_mtvec((uint64)ex);
   // enable software interrupts (ecall) in M mode.
   w_mie(r_mie() | MIE_MSIE);
+  w_mie(r_mie() | MIE_MEIE);
   // set the machine-mode trap handler to jump to function "ex" when a trap
   // occurs.
   w_mepc((uint64)0);
