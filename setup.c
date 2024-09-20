@@ -38,7 +38,6 @@ void setup_cores() {
     tprintf("Setting up second CPU! \n");
     init_cpu(2, 0x82000000ULL);
     proc_init();
-
     plic_hartinit();
     clock_init();
   };
@@ -60,13 +59,13 @@ void setup(void) {
   w_mtvec((uint64)ex);
   // enable software interrupts (ecall) in M mode.
   w_mie(r_mie() | MIE_MSIE);
-  w_mie(r_mie() | MIE_MEIE);
   // set the machine-mode trap handler to jump to function "ex" when a trap
   // occurs.
   w_mepc((uint64)0);
 
   w_pmpaddr0(0x3fffffffffffffULL);
   w_pmpcfg0(0xf);
+
   uint64 core_id = r_mhartid();
   w_tp(core_id);
 

@@ -24,14 +24,12 @@ uint64 kernel_trap(registers *regs) {
   uint64 mtval = r_mtval();
 
   struct cpu *cpu = get_cpu();
-  proc *proc = &cpu->processes[cpu->current_process];
 
-  proc->pc = mepc;
-  proc->sp = phys2virt((uint64)regs, proc);
-  proc->state = READY;
+  cpu->processes[cpu->current_process].pc = mepc;
+  cpu->processes[cpu->current_process].sp =
+      phys2virt((uint64)regs, &cpu->processes[cpu->current_process]);
+  cpu->processes[cpu->current_process].state = READY;
 
-  tprintf(" ");
-  tprintf(" ");
   int cause = dev_intr(regs);
 
   if (cause == 0) {
@@ -41,17 +39,17 @@ uint64 kernel_trap(registers *regs) {
   if (cause == 2) {
   }
 
-  // Caused by an ecall
-
+  // Get new process
   if (cause == 3) {
-    proc->pc += 4;
-    w_mepc(proc->pc);
+    cpu->processes[cpu->current_process].pc += 4;
+    w_mepc(cpu->processes[cpu->current_process].pc);
 
   } else {
-    w_mepc(proc->pc);
+    w_mepc(cpu->processes[cpu->current_process].pc);
   }
 
-  regs = (registers *)virt2phys(proc->sp, proc);
+  regs = (registers *)virt2phys(cpu->processes[cpu->current_process].sp,
+                                &cpu->processes[cpu->current_process]);
 
   regs->sp = (uint64)regs;
 

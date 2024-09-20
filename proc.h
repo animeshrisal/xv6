@@ -54,6 +54,7 @@ typedef struct {
   uint64 sp;
   uint64 base_address;
   uint64 page_table_base;
+  uint64 id;
   proc_state state;
 } proc;
 

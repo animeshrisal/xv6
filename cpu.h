@@ -8,7 +8,7 @@ struct cpu {
   proc *processes;
   int current_process;
   int max_processes;
-  int cpu_id;
+  uint64 cpu_id;
   uint64 memory_area;
   uint64 ticks;
 };
