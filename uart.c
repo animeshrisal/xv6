@@ -1,9 +1,15 @@
 #include "uart.h"
 #include "hardware.h"
+#include "spinlock.h"
 
 volatile struct uart *uart0 = (volatile struct uart *)0x10000000;
 
-void uart_init() { uart0->IER = 0x1; };
+struct spinlock uart_lock;
+
+void uart_init() {
+  uart0->IER = 0x1;
+  initlock(&uart_lock);
+};
 
 void uart_intr(void) {
   while (1) {

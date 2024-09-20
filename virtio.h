@@ -64,7 +64,7 @@ struct virtq_desc {
 struct virtq_avail {
   uint16 flags;
   uint16 idx;
-  uint16 ring[];
+  uint16 ring[256];
 };
 
 struct virtq_used_elem {
@@ -75,7 +75,7 @@ struct virtq_used_elem {
 struct virtq_used {
   uint16 flags;
   uint16 idx;
-  struct virtq_used_elem ring[];
+  struct virtq_used_elem ring[256];
 };
 
 static int virtq_alloc_desc();

@@ -5,8 +5,8 @@ CC=riscv64-unknown-elf-gcc
 CFLAGS=-g -mcmodel=medany -mno-relax -I. -ffreestanding
 OBJCOPY=riscv64-unknown-elf-objcopy
 
-KERNELDEPS = hardware.h riscv.h types.h display.h plic.h proc.h tprintf.h trap.h uart.h virtio.h kerneldef.h kernel.h param.h syscall.h gpu_driver.h 
-KERNELOBJS = boot.o kernel.o ex.o setup.o display.o plic.o proc.o syscall.o tprintf.o trap.o uart.o gpu_driver.o
+KERNELDEPS = hardware.h riscv.h types.h display.h plic.h proc.h tprintf.h trap.h uart.h virtio.h kerneldef.h kernel.h param.h syscall.h gpu_driver.h spinlock.h cpu.h 
+KERNELOBJS = boot.o kernel.o ex.o setup.o display.o plic.o proc.o syscall.o tprintf.o trap.o uart.o gpu_driver.o spinlock.o cpu.o
 USERDEPS = user_collision.h display.h types.h
 USER_COLLISION_OBJS = user.o gpu.o user_collision.o uprintf.o 
 USER_RNG_OBJS = user.o user_rng.o uprintf.o 
@@ -56,7 +56,7 @@ user_print.bin: $(USER_PRINT_OBJS) $(USERDEPS)
 
 
 run: user_collision.bin user_rng.bin user_print.bin kernel 
-	qemu-system-riscv64 -machine virt -device virtio-gpu-device -smp 1 -bios none -kernel ./kernel -global virtio-mmio.force-legacy=false -device loader,addr=0x80200000,file=user_collision.bin  -device loader,addr=0x80400000,file=user_rng.bin  -device loader,addr=0x80600000,file=user_print.bin  
+	qemu-system-riscv64 -machine virt -device virtio-gpu-device -smp 2 -bios none -kernel ./kernel -global virtio-mmio.force-legacy=false -device virtio-rng-device -device loader,addr=0x81000000,file=user_collision.bin  -device loader,addr=0x82000000,file=user_rng.bin -device loader,addr=0x82200000,file=user_print.bin
 
 	
 clean:

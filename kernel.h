@@ -1,5 +1,5 @@
-#ifndef SYSCALL_H
-#define SYSCALL_H
+#ifndef KERNEL_H
+#define KERNEL_H
 
 #include "types.h"
 

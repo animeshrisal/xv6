@@ -12,7 +12,6 @@ void set_pixels(Pixel *fb, uint32 x, uint32 y) {
 void make_rects(Pixel *fb, uint32 x, uint32 y, uint32 width, uint32 height) {
 
   Pixel black = {.R = 0, .G = 0, .B = 0, .A = 0};
-
   for (uint32 row = y; row < (y + height); row++) {
     for (uint32 col = x; col < (x + width); col++) {
       set_pixels(fb, col, row);
