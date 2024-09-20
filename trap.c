@@ -15,9 +15,6 @@ void clock_intr() {
   int interval = 100000;
 
   cpu->ticks++;
-  tprintf("--------");
-  tprinthex(cpu->cpu_id);
-  tprintf("--------");
   *(uint64 *)CLINT_MTIMECMP(cpu->cpu_id) =
 
       *(uint64 *)CLINT_MTIME + interval;
