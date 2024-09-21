@@ -41,7 +41,7 @@ uint64 kernel_trap(registers *regs) {
   // Get new process
   if (cause == 3) {
         if(cpu->cpu_id == 0) {
-    tprinthex(cpu->processes[cpu->current_process].pc);
+          tprintf(" ");
     }
 
     cpu->processes[cpu->current_process].pc += 4;

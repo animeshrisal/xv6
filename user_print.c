@@ -9,7 +9,7 @@ int main(void) {
 
   while (1) {
   ticks++;
-    if (ticks % 1 == 0) {
+    if (ticks % 1000000 == 0) {
       uprint("Running from process 1\n");
     }
   }

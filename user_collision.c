@@ -1,6 +1,7 @@
 #include "user_collision.h"
 #include "display.h"
 #include "types.h"
+#include "user_functions.h"
 
 __attribute__((aligned(16))) uint8 userstack[4096];
 
@@ -90,6 +91,7 @@ int main(void) {
   initialize_cubes();
 
   while (1) {
+    uprint("CPU 1 says hi!\n");
     clear_frame();
     update_cubes();
     render_cubes();
