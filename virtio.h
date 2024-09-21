@@ -54,6 +54,8 @@
 #define VIRTQ_DESC_F_WRITE 0x2
 #define VIRTQ_DESC_F_USED 0x4
 
+#define RING_SiZE 512
+
 struct virtq_desc {
   uint64 addr;
   uint32 len;
@@ -64,7 +66,7 @@ struct virtq_desc {
 struct virtq_avail {
   uint16 flags;
   uint16 idx;
-  uint16 ring[256];
+  uint16 ring[512];
 };
 
 struct virtq_used_elem {
@@ -75,7 +77,7 @@ struct virtq_used_elem {
 struct virtq_used {
   uint16 flags;
   uint16 idx;
-  struct virtq_used_elem ring[256];
+  struct virtq_used_elem ring[512];
 };
 
 static int virtq_alloc_desc();

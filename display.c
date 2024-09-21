@@ -4,7 +4,7 @@
 #include "virtio.h"
 
 // virtio
-#define NUM 256
+#define NUM 512
 
 extern uint64 process_id;
 

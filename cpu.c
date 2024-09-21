@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include "kerneldef.h"
-#include "tprintf.h"
 
 struct cpu cpus[2];
 proc cpu1_processes[1];
