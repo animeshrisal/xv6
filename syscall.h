@@ -9,5 +9,6 @@
 #define SYS_make_rect 6
 #define SYS_clear_frame 7
 #define SYS_set_pixel 8
+#define SYS_get_char 9
 
 #endif

@@ -1,6 +1,5 @@
 #include "cpu.h"
 #include "riscv.h"
-#include "tprintf.h"
 #include "trap.h"
 #include "types.h"
 
@@ -41,9 +40,10 @@ uint64 kernel_trap(registers *regs) {
 
   // Get new process
   if (cause == 3) {
-    if(cpu->cpu_id == 0) {
+        if(cpu->cpu_id == 0) {
     tprinthex(cpu->processes[cpu->current_process].pc);
     }
+
     cpu->processes[cpu->current_process].pc += 4;
     w_mepc(cpu->processes[cpu->current_process].pc);
 

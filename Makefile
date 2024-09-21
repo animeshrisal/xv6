@@ -5,12 +5,12 @@ CC=riscv64-unknown-elf-gcc
 CFLAGS=-g -mcmodel=medany -mno-relax -I. -ffreestanding
 OBJCOPY=riscv64-unknown-elf-objcopy
 
-KERNELDEPS = hardware.h riscv.h types.h display.h plic.h proc.h tprintf.h trap.h uart.h virtio.h kerneldef.h kernel.h param.h syscall.h gpu_driver.h spinlock.h cpu.h 
-KERNELOBJS = boot.o kernel.o ex.o setup.o display.o plic.o proc.o syscall.o tprintf.o trap.o uart.o gpu_driver.o spinlock.o cpu.o
-USERDEPS = user_collision.h display.h types.h
-USER_COLLISION_OBJS = user.o gpu.o user_collision.o uprintf.o 
-USER_RNG_OBJS = user.o user_rng.o uprintf.o 
-USER_PRINT_OBJS = user.o user_print.o uprintf.o
+KERNELDEPS = hardware.h riscv.h types.h display.h plic.h proc.h trap.h uart.h virtio.h kerneldef.h kernel.h param.h syscall.h gpu_driver.h spinlock.h cpu.h 
+KERNELOBJS = boot.o kernel.o ex.o setup.o display.o plic.o proc.o syscall.o trap.o uart.o gpu_driver.o spinlock.o cpu.o
+USERDEPS = user_collision.h display.h types.h user_functions.h
+USER_COLLISION_OBJS = user.o gpu.o user_collision.o uprintf.o user_functions.o 
+USER_RNG_OBJS = user.o user_rng.o uprintf.o user_functions.o 
+USER_PRINT_OBJS = user.o user_print.o uprintf.o user_functions.o
 
 %.o: %.c $(KERNELDEPS) $(USERDEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)

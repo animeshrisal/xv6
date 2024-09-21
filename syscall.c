@@ -2,7 +2,6 @@
 #include "display.h"
 #include "gpu_driver.h"
 #include "kerneldef.h"
-#include "tprintf.h"
 #include "types.h"
 
 void syscall(registers *regs) {
@@ -17,6 +16,9 @@ void syscall(registers *regs) {
     transfer();
     break;
 
+  case SYS_get_char:
+    get_char();
+    break;
   case SYS_uprintf:
     tprintf((char *)virt2phys(regs->a0));
     break;

@@ -4,7 +4,6 @@
 #include "plic.h"
 #include "riscv.h"
 #include "spinlock.h"
-#include "tprintf.h"
 #include "trap.h"
 #include "types.h"
 #include "uart.h"

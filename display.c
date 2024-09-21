@@ -1,5 +1,5 @@
 #include "display.h"
-#include "tprintf.h"
+#include "kerneldef.h"
 #include "types.h"
 #include "virtio.h"
 

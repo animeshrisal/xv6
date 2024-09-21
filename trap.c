@@ -5,7 +5,6 @@
 #include "kerneldef.h"
 #include "plic.h"
 #include "riscv.h"
-#include "tprintf.h"
 #include "types.h"
 #include "uart.h"
 

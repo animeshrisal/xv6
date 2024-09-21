@@ -1,6 +1,7 @@
 
 #include "gpu_driver.h"
-#include "tprintf.h"
+#include "kerneldef.h"
+#include "syscall.h"
 
 void set_pixels(Pixel *fb, uint32 x, uint32 y) {
   Pixel black = {.R = 0, .G = 0, .B = 0, .A = 0};

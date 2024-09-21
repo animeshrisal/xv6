@@ -1,7 +1,6 @@
 #include "cpu.h"
 #include "kerneldef.h"
 #include "riscv.h"
-#include "tprintf.h"
 #include "trap.h"
 
 __attribute__((aligned(4096))) uint64 cpu1_page_table[1][512 * 3];
