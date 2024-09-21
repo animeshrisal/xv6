@@ -64,9 +64,11 @@ void proc_init() {
 void proc_intr() {
   struct cpu *cpu = get_cpu();
 
-  if(cpu->cpu_id == 1) {
-      cpu->current_process = cpu->current_process == 0 ? 1 : 0;
+  if (cpu->cpu_id == 1) {
+    cpu->current_process = cpu->current_process == 0 ? 1 : 0;
   }
+
+
   w_satp(MAKE_SATP(cpu->processes[cpu->current_process].page_table_base));
   asm volatile("sfence.vma zero, zero");
   w_mscratch(cpu->processes[cpu->current_process].base_address);

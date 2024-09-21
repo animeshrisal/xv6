@@ -1,5 +1,4 @@
 #include "cpu.h"
-#include "kerneldef.h"
 #include "riscv.h"
 #include "tprintf.h"
 #include "trap.h"
@@ -33,6 +32,7 @@ uint64 kernel_trap(registers *regs) {
   int cause = dev_intr(regs);
 
   if (cause == 0) {
+
   }
 
   // Caused by clock interrupt
@@ -41,12 +41,16 @@ uint64 kernel_trap(registers *regs) {
 
   // Get new process
   if (cause == 3) {
+    if(cpu->cpu_id == 0) {
+    tprinthex(cpu->processes[cpu->current_process].pc);
+    }
     cpu->processes[cpu->current_process].pc += 4;
     w_mepc(cpu->processes[cpu->current_process].pc);
 
   } else {
     w_mepc(cpu->processes[cpu->current_process].pc);
   }
+
 
   regs = (registers *)virt2phys(cpu->processes[cpu->current_process].sp,
                                 &cpu->processes[cpu->current_process]);

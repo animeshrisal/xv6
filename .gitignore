@@ -3,4 +3,6 @@
 hello
 hello.bin
 kernel
-
+user_collision
+user_rng
+user_print

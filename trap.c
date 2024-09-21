@@ -30,17 +30,16 @@ void clock_init() {
 
 int dev_intr(registers *regs) {
   uint64 mcause = r_mcause();
+  struct cpu *cpu = get_cpu();
 
   if (mcause == 0x800000000000000BL) {
 
-    int irq = plic_claim();
+    uint64 irq = plic_claim();
     if (irq == UART0_IRQ) {
-
       uart_intr();
 
     } else if (irq == 8) {
       virtio_gpu_intr();
-
     } else {
       tprintf("Wrong interrupt");
     }

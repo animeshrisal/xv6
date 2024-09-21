@@ -4,7 +4,7 @@
 #include "virtio.h"
 
 // virtio
-#define NUM 512
+#define NUM 256
 
 extern uint64 process_id;
 
@@ -41,8 +41,8 @@ void transfer_to_host_2d(int virtio_gpu_fd) {
   struct virtio_gpu_rect rect = {
       .x = 0,
       .y = 0,
-      .width = 10,
-      .height = 10,
+      .width = 1,
+      .height = 1,
   };
 
   struct virtio_gpu_transfer_to_host_2d transfer_cmd = {
@@ -173,7 +173,6 @@ void virtio_gpu_intr() {
 
   while (gpu.used_idx != gpu.used->idx) {
     int id = gpu.used->ring[gpu.used_idx % NUM].id;
-    // struct virtq_desc desc = gpu.desc[id];
     free_chain(id);
     gpu.used_idx = gpu.used_idx + 1;
   }

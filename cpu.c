@@ -20,6 +20,6 @@ void init_cpu(int max_processes, uint64 memory_area) {
 };
 
 struct cpu *get_cpu() {
-  int hartid = cpuid();
+  uint64 hartid = cpuid();
   return &cpus[hartid];
 }

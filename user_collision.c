@@ -90,6 +90,7 @@ int main(void) {
   initialize_cubes();
 
   while (1) {
+    uprintf((uint64) "AAAAA!");
     clear_frame();
     update_cubes();
     render_cubes();
