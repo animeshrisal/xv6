@@ -12,8 +12,4 @@ void uart_init(void);
 void uartputc_sync(int c);
 void get_char();
 
-
-
-
 #endif
-

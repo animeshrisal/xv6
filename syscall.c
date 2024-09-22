@@ -17,7 +17,7 @@ void syscall(registers *regs) {
     break;
 
   case SYS_get_char:
-    get_char();
+    // get_char();
     break;
   case SYS_uprintf:
     tprintf((char *)virt2phys(regs->a0));

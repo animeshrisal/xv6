@@ -69,6 +69,4 @@ void tprinthex(uint64 hex) {
   release(&uart_lock);
 }
 
-void get_char() {
-  
-}
+void get_char() {}
